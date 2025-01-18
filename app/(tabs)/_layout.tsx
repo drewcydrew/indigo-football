@@ -7,6 +7,8 @@ import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
+import { NamesProvider } from '@/context/NamesContext';
+
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -19,7 +21,8 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Tabs
+    <NamesProvider>
+       <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         // Disable the static render of the header on web
@@ -62,5 +65,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </NamesProvider>
+   
   );
 }

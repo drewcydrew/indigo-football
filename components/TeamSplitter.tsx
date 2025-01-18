@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { useNames } from '../context/NamesContext';
 import { useThemeColor } from './Themed';
@@ -6,10 +6,16 @@ import { useThemeColor } from './Themed';
 const TeamSplitter = () => {
   const { names } = useNames();
   const textColor = useThemeColor({}, 'text');
+  const [teamA, setTeamA] = useState<string[]>([]);
+  const [teamB, setTeamB] = useState<string[]>([]);
 
-  // Split names into two teams
-  const teamA = names.filter((_, index) => index % 2 === 0);
-  const teamB = names.filter((_, index) => index % 2 !== 0);
+  useEffect(() => {
+    // Split names into two teams
+    const newTeamA = names.filter((_, index) => index % 2 === 0);
+    const newTeamB = names.filter((_, index) => index % 2 !== 0);
+    setTeamA(newTeamA);
+    setTeamB(newTeamB);
+  }, [names]);
 
   return (
     <View style={styles.container}>

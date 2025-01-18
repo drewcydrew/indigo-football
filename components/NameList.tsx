@@ -1,20 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Text, View } from './Themed';
-import AddName from './AddName';
-
-const initialNames = ['Alice', 'Bob', 'Charlie', 'David', 'Eve'];
+import { useNames } from '../context/NamesContext';
 
 const NameList = () => {
-  const [names, setNames] = useState(initialNames);
-
-  const addName = (name: string) => {
-    setNames([...names, name]);
-  };
+  const { names } = useNames();
 
   return (
     <View style={styles.container}>
-      <AddName onAdd={addName} />
       {names.map((name, index) => (
         <Text key={index} style={styles.text}>
           • {name}

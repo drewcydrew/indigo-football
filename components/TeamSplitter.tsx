@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { useNames } from '../context/NamesContext';
 import { useThemeColor } from './Themed';
@@ -6,35 +6,19 @@ import { useThemeColor } from './Themed';
 const TeamSplitter = () => {
   const { names } = useNames();
   const textColor = useThemeColor({}, 'text');
-  const [teamA, setTeamA] = useState<string[]>([]);
-  const [teamB, setTeamB] = useState<string[]>([]);
-
-  useEffect(() => {
-    // Split names into two teams
-    const newTeamA = names.filter((_, index) => index % 2 === 0);
-    const newTeamB = names.filter((_, index) => index % 2 !== 0);
-    setTeamA(newTeamA);
-    setTeamB(newTeamB);
-  }, [names]);
 
   return (
     <View style={styles.container}>
-      <View style={styles.teamContainer}>
-        <Text style={[styles.teamTitle, { color: textColor }]}>Team A</Text>
-        {teamA.map((name, index) => (
-          <Text key={index} style={[styles.nameText, { color: textColor }]}>
-            {name}
-          </Text>
-        ))}
-      </View>
-      <View style={styles.teamContainer}>
-        <Text style={[styles.teamTitle, { color: textColor }]}>Team B</Text>
-        {teamB.map((name, index) => (
-          <Text key={index} style={[styles.nameText, { color: textColor }]}>
-            {name}
-          </Text>
-        ))}
-      </View>
+      {names.map((team, teamIndex) => (
+        <View key={teamIndex} style={styles.teamContainer}>
+          <Text style={[styles.teamTitle, { color: textColor }]}>Team {teamIndex + 1}</Text>
+          {team.map((player, playerIndex) => (
+            <Text key={playerIndex} style={[styles.nameText, { color: textColor }]}>
+              {player.name} (Score: {player.score})
+            </Text>
+          ))}
+        </View>
+      ))}
     </View>
   );
 };

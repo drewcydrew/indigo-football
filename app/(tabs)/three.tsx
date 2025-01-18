@@ -19,9 +19,12 @@ export default function TabThreeScreen() {
 
 const AddNameWrapper = () => {
   const { addName } = useNames();
+  const handleAdd = (name: string, score: number) => {
+    addName(name, score);
+  };
   return (
     <View style={styles.addNameWrapper}>
-      <AddName onAdd={addName} />
+      <AddName onAdd={handleAdd} />
     </View>
   );
 };

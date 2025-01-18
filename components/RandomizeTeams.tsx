@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Modal, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, Modal, TouchableOpacity, Text, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useNames } from '../context/NamesContext';
+import { useNames, Player } from '../context/NamesContext'; // Import Player type
 
 const RandomizeTeams = () => {
   const { names, setNames } = useNames();
   const [modalVisible, setModalVisible] = useState(false);
+  const [numTeams, setNumTeams] = useState('2');
 
   const randomizeTeams = () => {
-    const shuffledNames = [...names].sort(() => Math.random() - 0.5);
-    setNames(shuffledNames);
+    const allPlayers = [...names.flat()].sort(() => Math.random() - 0.5);
+    const teams: Player[][] = Array.from({ length: parseInt(numTeams, 10) }, () => []);
+    allPlayers.forEach((player, index) => {
+      teams[index % teams.length].push(player);
+    });
+    setNames(teams);
     setModalVisible(false);
   };
 
@@ -27,6 +32,13 @@ const RandomizeTeams = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Randomize Teams</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Number of teams"
+              value={numTeams}
+              onChangeText={setNumTeams}
+              keyboardType="numeric"
+            />
             <View style={styles.buttonContainer}>
               <TouchableOpacity onPress={randomizeTeams} style={styles.button}>
                 <Text style={styles.buttonText}>Randomize</Text>
@@ -65,6 +77,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 20,
+  },
+  input: {
+    width: '100%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 5,
   },
   buttonContainer: {
     flexDirection: 'row',

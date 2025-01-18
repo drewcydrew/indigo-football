@@ -8,9 +8,9 @@ const NameList = () => {
 
   return (
     <View style={styles.container}>
-      {names.map((name, index) => (
+      {names.flat().map((player, index) => (
         <Text key={index} style={styles.text}>
-          • {name}
+          • {player.name} (Score: {player.score})
         </Text>
       ))}
     </View>

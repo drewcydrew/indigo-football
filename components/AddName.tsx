@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { StyleSheet, TextInput, View, Modal, TouchableOpacity, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons'; // Ensure correct import
 
-const AddName = ({ onAdd }: { onAdd: (name: string) => void }) => {
+const AddName = ({ onAdd }: { onAdd: (name: string, score: number) => void }) => {
   const [name, setName] = useState('');
+  const [score, setScore] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleAdd = () => {
-    if (name.trim()) {
-      onAdd(name);
+    const parsedScore = parseInt(score, 10);
+    if (name.trim() && !isNaN(parsedScore)) {
+      onAdd(name, parsedScore);
       setName('');
+      setScore('');
       setModalVisible(false);
     }
   };
@@ -32,6 +35,13 @@ const AddName = ({ onAdd }: { onAdd: (name: string) => void }) => {
               placeholder="Enter name"
               value={name}
               onChangeText={setName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter score"
+              value={score}
+              onChangeText={setScore}
+              keyboardType="numeric"
             />
             <View style={styles.buttonContainer}>
               <TouchableOpacity onPress={handleAdd} style={styles.button}>

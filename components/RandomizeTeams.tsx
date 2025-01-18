@@ -1,27 +1,44 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Modal, TouchableOpacity, Text, TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNames, Player } from '../context/NamesContext'; // Import Player type
+import { CheckBox } from 'react-native-elements'; // Import CheckBox
 
-const RandomizeTeams = () => {
-  const { names, setNames } = useNames();
+const RandomizeTeams = ({ showScores, setShowScores }: { showScores: boolean, setShowScores: (value: boolean) => void }) => {
+  const { names, saveTeams } = useNames();
   const [modalVisible, setModalVisible] = useState(false);
   const [numTeams, setNumTeams] = useState('2');
+  const [algorithm, setAlgorithm] = useState('scores'); // State to select algorithm
 
   const randomizeTeams = () => {
-    const allPlayers = [...names.flat()].sort(() => Math.random() - 0.5);
+    const allPlayers = [...names.flat()].filter(player => player.included).sort(() => Math.random() - 0.5);
     const teams: Player[][] = Array.from({ length: parseInt(numTeams, 10) }, () => []);
-    allPlayers.forEach((player, index) => {
-      teams[index % teams.length].push(player);
-    });
-    setNames(teams);
+
+    if (algorithm === 'scores') {
+      const teamScores = Array(parseInt(numTeams, 10)).fill(0);
+      allPlayers.forEach(player => {
+        const minScoreIndex = teamScores.indexOf(Math.min(...teamScores));
+        teams[minScoreIndex].push(player);
+        teamScores[minScoreIndex] += player.score;
+      });
+    } else {
+      allPlayers.forEach((player, index) => {
+        teams[index % parseInt(numTeams, 10)].push(player);
+      });
+    }
+
+    saveTeams(teams);
     setModalVisible(false);
   };
 
   return (
-    <View>
-      <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.iconButton} onPress={randomizeTeams}>
         <Icon name="shuffle" size={40} color="#007bff" />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
+        <Icon name="settings" size={40} color="#007bff" />
       </TouchableOpacity>
       <Modal
         animationType="slide"
@@ -38,6 +55,27 @@ const RandomizeTeams = () => {
               value={numTeams}
               onChangeText={setNumTeams}
               keyboardType="numeric"
+              // Use default parameters instead of defaultProps
+              placeholderTextColor="#888"
+            />
+            <Picker
+              selectedValue={algorithm}
+              style={styles.picker}
+              onValueChange={(itemValue) => setAlgorithm(itemValue)}
+              // Use default parameters instead of defaultProps
+              mode="dropdown"
+            >
+              <Picker.Item label="Evenly Distribute Scores" value="scores" />
+              <Picker.Item label="Evenly Distribute Players" value="players" />
+            </Picker>
+            <CheckBox
+              title="Show Scores"
+              checked={showScores}
+              onPress={() => setShowScores(!showScores)}
+              // Use default parameters instead of defaultProps
+              checkedIcon="dot-circle-o"
+              uncheckedIcon="circle-o"
+              textStyle={{ color: 'black' }} // Add default text color
             />
             <View style={styles.buttonContainer}>
               <TouchableOpacity onPress={randomizeTeams} style={styles.button}>
@@ -55,10 +93,12 @@ const RandomizeTeams = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   iconButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
+    marginHorizontal: 10,
   },
   modalContainer: {
     flex: 1,
@@ -85,6 +125,11 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 10,
     borderRadius: 5,
+  },
+  picker: {
+    width: '100%',
+    height: 50,
+    marginVertical: 10,
   },
   buttonContainer: {
     flexDirection: 'row',

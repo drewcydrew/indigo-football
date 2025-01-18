@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
@@ -6,14 +7,14 @@ import TeamSplitter from '@/components/TeamSplitter'; // Import TeamSplitter
 import RandomizeTeams from '@/components/RandomizeTeams'; // Import RandomizeTeams
 
 export default function TabTwoScreen() {
+  const [showScores, setShowScores] = useState(true); // State to toggle scores
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <View style={styles.randomizeTeamsWrapper}>
-        <RandomizeTeams />
+        <RandomizeTeams showScores={showScores} setShowScores={setShowScores} />
       </View>
-      <TeamSplitter />
+      <TeamSplitter showScores={showScores} />
     </View>
   );
 }

@@ -1,11 +1,10 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from './Themed';
-import { CheckBox } from 'react-native-elements'; // Import CheckBox from react-native-elements
 import { useNames } from '../context/NamesContext';
 
-const NameList = () => {
-  const { names, togglePlayerIncluded } = useNames();
+const PlayerDisplay = () => {
+  const { names } = useNames();
   const flatNames = names.flat();
   const halfLength = Math.ceil(flatNames.length / 2);
   const firstColumn = flatNames.slice(0, halfLength);
@@ -16,14 +15,6 @@ const NameList = () => {
       <View style={styles.column}>
         {firstColumn.map((player, index) => (
           <View key={index} style={styles.playerContainer}>
-            <CheckBox
-              checked={player.included}
-              onPress={() => togglePlayerIncluded(player.name)}
-              // Use default parameters instead of defaultProps
-              checkedIcon="dot-circle-o"
-              uncheckedIcon="circle-o"
-              textStyle={{ color: 'black' }} // Add default text color
-            />
             <Text style={styles.text}>
               {player.name}
             </Text>
@@ -33,14 +24,6 @@ const NameList = () => {
       <View style={styles.column}>
         {secondColumn.map((player, index) => (
           <View key={index} style={styles.playerContainer}>
-            <CheckBox
-              checked={player.included}
-              onPress={() => togglePlayerIncluded(player.name)}
-              // Use default parameters instead of defaultProps
-              checkedIcon="dot-circle-o"
-              uncheckedIcon="circle-o"
-              textStyle={{ color: 'black' }} // Add default text color
-            />
             <Text style={styles.text}>
               {player.name}
             </Text>
@@ -72,4 +55,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NameList;
+export default PlayerDisplay;

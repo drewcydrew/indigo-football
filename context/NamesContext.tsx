@@ -1,5 +1,6 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as React from 'react';
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { saveToStorage, loadFromStorage } from '../utils/crossPlatformStorage';
 
 export interface Player {
   name: string;
@@ -30,17 +31,6 @@ interface NamesContextType {
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
-
-const isAsyncStorageAvailable = async () => {
-  try {
-    const testKey = '__test__';
-    await AsyncStorage.setItem(testKey, testKey);
-    await AsyncStorage.removeItem(testKey);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
 
 const initialNames: Player[][] = [
   [
@@ -75,69 +65,37 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [showScores, setShowScores] = useState(true);
   const [numTeams, setNumTeams] = useState(2);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const savedNames = await AsyncStorage.getItem('names');
-        const savedTeams = await AsyncStorage.getItem('teams');
-        const savedShowScores = await AsyncStorage.getItem('showScores');
-        const savedNumTeams = await AsyncStorage.getItem('numTeams');
-
-        if (savedNames !== null) setNames(JSON.parse(savedNames));
-        if (savedTeams !== null) setTeams(JSON.parse(savedTeams));
-        if (savedShowScores !== null) setShowScores(JSON.parse(savedShowScores));
-        if (savedNumTeams !== null) setNumTeams(JSON.parse(savedNumTeams));
+        const savedData = await loadFromStorage();
+        if (savedData.names) {
+          setNames(savedData.names);
+        }
+        setShowScores(savedData.showScores);
+        setNumTeams(savedData.numTeams);
       } catch (error) {
-        console.error('Failed to load data from AsyncStorage', error);
+        console.warn('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     loadData();
   }, []);
 
+  // Save data when state changes
   useEffect(() => {
-    const saveData = async () => {
-      try {
-        await AsyncStorage.setItem('names', JSON.stringify(names));
-      } catch (error) {
-        console.error('Failed to save names to AsyncStorage', error);
-      }
-    };
-    saveData();
-  }, [names]);
+    if (isLoading) return;
 
-  useEffect(() => {
-    const saveData = async () => {
-      try {
-        await AsyncStorage.setItem('teams', JSON.stringify(teams));
-      } catch (error) {
-        console.error('Failed to save teams to AsyncStorage', error);
-      }
-    };
-    saveData();
-  }, [teams]);
-
-  useEffect(() => {
-    const saveData = async () => {
-      try {
-        await AsyncStorage.setItem('showScores', JSON.stringify(showScores));
-      } catch (error) {
-        console.error('Failed to save showScores to AsyncStorage', error);
-      }
-    };
-    saveData();
-  }, [showScores]);
-
-  useEffect(() => {
-    const saveData = async () => {
-      try {
-        await AsyncStorage.setItem('numTeams', JSON.stringify(numTeams));
-      } catch (error) {
-        console.error('Failed to save numTeams to AsyncStorage', error);
-      }
-    };
-    saveData();
-  }, [numTeams]);
+    saveToStorage({
+      names,
+      showScores,
+      numTeams
+    });
+  }, [names, showScores, numTeams, isLoading]);
 
   const addName = (name: string, score: number) => {
     setNames((prevNames) => {
@@ -185,8 +143,27 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
-    <NamesContext.Provider value={{ names, teams, addName, setNames, togglePlayerIncluded, saveTeams, updatePlayer, setAllIncluded, showScores, setShowScores, numTeams, setNumTeams }}>
+    <NamesContext.Provider 
+      value={{ 
+        names, 
+        teams, 
+        addName, 
+        setNames, 
+        togglePlayerIncluded, 
+        saveTeams, 
+        updatePlayer, 
+        setAllIncluded, 
+        showScores, 
+        setShowScores, 
+        numTeams, 
+        setNumTeams
+      }}
+    >
       {children}
     </NamesContext.Provider>
   );

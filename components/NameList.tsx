@@ -1,66 +1,76 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View, FlatList, ListRenderItem, StyleSheet } from 'react-native';
 import { Text } from './Themed';
-import { CheckBox } from 'react-native-elements'; // Import CheckBox from react-native-elements
+import { CheckBox } from 'react-native-elements';
 import { useNames } from '../context/NamesContext';
+
+interface Player {
+  name: string;
+  included: boolean;
+}
 
 const NameList = () => {
   const { names, togglePlayerIncluded } = useNames();
-  const flatNames = names.flat();
-  const halfLength = Math.ceil(flatNames.length / 2);
-  const firstColumn = flatNames.slice(0, halfLength);
-  const secondColumn = flatNames.slice(halfLength);
+  const flatNames: Player[] = names.flat();
+
+  const renderName = (player: Player) => (
+    <View style={styles.nameContainer}>
+      <CheckBox
+        checked={player.included}
+        onPress={() => togglePlayerIncluded(player.name)}
+        checkedIcon="dot-circle-o"
+        uncheckedIcon="circle-o"
+        textStyle={{ color: 'black' }}
+      />
+      <Text style={styles.text}>
+        {player.name}
+      </Text>
+    </View>
+  );
+
+  const renderRow = ({ item }: { item: Player[] }) => (
+    <View style={styles.row}>
+      {item.map((player, index) => (
+        <View key={index} style={styles.column}>
+          {renderName(player)}
+        </View>
+      ))}
+    </View>
+  );
+
+  const groupedNames = flatNames.reduce((result: Player[][], player, index) => {
+    const rowIndex = Math.floor(index / 2);
+    if (!result[rowIndex]) {
+      result[rowIndex] = [];
+    }
+    result[rowIndex].push(player);
+    return result;
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.column}>
-        {firstColumn.map((player, index) => (
-          <View key={index} style={styles.playerContainer}>
-            <CheckBox
-              checked={player.included}
-              onPress={() => togglePlayerIncluded(player.name)}
-              // Use default parameters instead of defaultProps
-              checkedIcon="dot-circle-o"
-              uncheckedIcon="circle-o"
-              textStyle={{ color: 'black' }} // Add default text color
-            />
-            <Text style={styles.text}>
-              {player.name}
-            </Text>
-          </View>
-        ))}
-      </View>
-      <View style={styles.column}>
-        {secondColumn.map((player, index) => (
-          <View key={index} style={styles.playerContainer}>
-            <CheckBox
-              checked={player.included}
-              onPress={() => togglePlayerIncluded(player.name)}
-              // Use default parameters instead of defaultProps
-              checkedIcon="dot-circle-o"
-              uncheckedIcon="circle-o"
-              textStyle={{ color: 'black' }} // Add default text color
-            />
-            <Text style={styles.text}>
-              {player.name}
-            </Text>
-          </View>
-        ))}
-      </View>
-    </View>
+    <FlatList
+      data={groupedNames}
+      renderItem={renderRow}
+      keyExtractor={(item, index) => index.toString()}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    padding: 10,
+  },
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 10,
+    marginBottom: 10,
   },
   column: {
     flex: 1,
+    marginHorizontal: 5,
   },
-  playerContainer: {
+  nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 5,

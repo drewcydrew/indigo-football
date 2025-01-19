@@ -50,10 +50,12 @@ export default function TabLayout() {
           ),
         }}
       />
+      
+      
       <Tabs.Screen
-        name="two"
+        name="four"
         options={{
-          title: 'Teams',
+          title: 'Players',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
@@ -65,9 +67,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="four"
+        name="two"
         options={{
-          title: 'Players',
+          title: 'Teams',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />

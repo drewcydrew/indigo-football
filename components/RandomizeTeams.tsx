@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Modal, TouchableOpacity, Text, TextInput } from 'react-native';
+import { StyleSheet, View, Modal, TouchableOpacity, Text } from 'react-native';
+import { Slider } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useNames, Player } from '../context/NamesContext'; // Import Player type
+import { useNames, Player } from '../context/NamesContext';
 import { CheckBox } from 'react-native-elements'; // Import CheckBox
 
 const RandomizeTeams = ({ showScores, setShowScores }: { showScores: boolean, setShowScores: (value: boolean) => void }) => {
   const { names, saveTeams } = useNames();
   const [modalVisible, setModalVisible] = useState(false);
-  const [numTeams, setNumTeams] = useState('2');
+  const [numTeams, setNumTeams] = useState(2);
   const [algorithm, setAlgorithm] = useState('scores'); // State to select algorithm
 
   const randomizeTeams = () => {
     const allPlayers = [...names.flat()].filter(player => player.included).sort(() => Math.random() - 0.5);
-    const teams: Player[][] = Array.from({ length: parseInt(numTeams, 10) }, () => []);
+    const teams: Player[][] = Array.from({ length: numTeams }, () => []);
 
     if (algorithm === 'scores') {
-      const teamScores = Array(parseInt(numTeams, 10)).fill(0);
+      const teamScores = Array(numTeams).fill(0);
       allPlayers.forEach(player => {
         const minScoreIndex = teamScores.indexOf(Math.min(...teamScores));
         teams[minScoreIndex].push(player);
@@ -24,7 +25,7 @@ const RandomizeTeams = ({ showScores, setShowScores }: { showScores: boolean, se
       });
     } else {
       allPlayers.forEach((player, index) => {
-        teams[index % parseInt(numTeams, 10)].push(player);
+        teams[index % numTeams].push(player);
       });
     }
 
@@ -49,20 +50,19 @@ const RandomizeTeams = ({ showScores, setShowScores }: { showScores: boolean, se
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Randomize Teams</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Number of teams"
+            <Text>Number of Teams: {numTeams}</Text>
+            <Slider
               value={numTeams}
-              onChangeText={setNumTeams}
-              keyboardType="numeric"
-              // Use default parameters instead of defaultProps
-              placeholderTextColor="#888"
+              onValueChange={setNumTeams}
+              minimumValue={2}
+              maximumValue={6}
+              step={1}
+              style={styles.slider}
             />
             <Picker
               selectedValue={algorithm}
               style={styles.picker}
               onValueChange={(itemValue) => setAlgorithm(itemValue)}
-              // Use default parameters instead of defaultProps
               mode="dropdown"
             >
               <Picker.Item label="Evenly Distribute Scores" value="scores" />
@@ -77,14 +77,9 @@ const RandomizeTeams = ({ showScores, setShowScores }: { showScores: boolean, se
               uncheckedIcon="circle-o"
               textStyle={{ color: 'black' }} // Add default text color
             />
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity onPress={randomizeTeams} style={styles.button}>
-                <Text style={styles.buttonText}>Randomize</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.button}>
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity onPress={randomizeTeams} style={styles.button}>
+              <Text style={styles.buttonText}>OK</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -118,31 +113,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
-  input: {
-    width: '100%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    padding: 10,
+  slider: {
+    width: '80%',
     marginVertical: 10,
-    borderRadius: 5,
   },
   picker: {
     width: '100%',
     height: 50,
     marginVertical: 10,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
   button: {
-    flex: 1,
     alignItems: 'center',
     padding: 10,
-    marginHorizontal: 5,
     backgroundColor: '#007bff',
     borderRadius: 5,
+    marginTop: 20,
   },
   buttonText: {
     color: 'white',

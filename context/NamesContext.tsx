@@ -4,6 +4,8 @@ export interface Player {
   name: string;
   score: number;
   included: boolean;
+  bio: string; // New field for bio
+  matches: number; // New field for number of matches
 }
 
 interface Team {
@@ -18,6 +20,7 @@ interface NamesContextType {
   setNames: (names: Player[][]) => void;
   togglePlayerIncluded: (name: string) => void;
   saveTeams: (newTeams: Player[][]) => void;
+  updatePlayer: (name: string, newName: string, newScore: number, newBio: string, newMatches: number) => void;
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
@@ -25,32 +28,32 @@ const NamesContext = createContext<NamesContextType | undefined>(undefined);
 export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [names, setNames] = useState<Player[][]>([
     [
-      { name: 'Alice', score: 3, included: true },
-      { name: 'Bob', score: 4, included: true },
-      { name: 'Charlie', score: 2, included: true },
-      { name: 'David', score: 5, included: true },
-      { name: 'Eve', score: 1, included: true },
+      { name: 'Alice', score: 3, included: true, bio: 'Forward', matches: 10 },
+      { name: 'Bob', score: 4, included: true, bio: 'Defender', matches: 12 },
+      { name: 'Charlie', score: 2, included: true, bio: 'Midfielder', matches: 8 },
+      { name: 'David', score: 5, included: true, bio: 'Goalkeeper', matches: 15 },
+      { name: 'Eve', score: 1, included: true, bio: 'Forward', matches: 5 },
     ],
     [
-      { name: 'Frank', score: 3, included: true },
-      { name: 'Grace', score: 4, included: true },
-      { name: 'Heidi', score: 2, included: true },
-      { name: 'Ivan', score: 5, included: true },
-      { name: 'Judy', score: 1, included: true },
+      { name: 'Frank', score: 3, included: true, bio: 'Defender', matches: 10 },
+      { name: 'Grace', score: 4, included: true, bio: 'Midfielder', matches: 12 },
+      { name: 'Heidi', score: 2, included: true, bio: 'Forward', matches: 8 },
+      { name: 'Ivan', score: 5, included: true, bio: 'Goalkeeper', matches: 15 },
+      { name: 'Judy', score: 1, included: true, bio: 'Defender', matches: 5 },
     ],
     [
-      { name: 'Mallory', score: 3, included: true },
-      { name: 'Niaj', score: 4, included: true },
-      { name: 'Olivia', score: 2, included: true },
-      { name: 'Peggy', score: 5, included: true },
-      { name: 'Sybil', score: 1, included: true },
+      { name: 'Mallory', score: 3, included: true, bio: 'Forward', matches: 10 },
+      { name: 'Niaj', score: 4, included: true, bio: 'Defender', matches: 12 },
+      { name: 'Olivia', score: 2, included: true, bio: 'Midfielder', matches: 8 },
+      { name: 'Peggy', score: 5, included: true, bio: 'Goalkeeper', matches: 15 },
+      { name: 'Sybil', score: 1, included: true, bio: 'Forward', matches: 5 },
     ],
     [
-      { name: 'Trent', score: 3, included: true },
-      { name: 'Victor', score: 4, included: true },
-      { name: 'Walter', score: 2, included: true },
-      { name: 'Xander', score: 5, included: true },
-      { name: 'Yvonne', score: 1, included: true },
+      { name: 'Trent', score: 3, included: true, bio: 'Defender', matches: 10 },
+      { name: 'Victor', score: 4, included: true, bio: 'Midfielder', matches: 12 },
+      { name: 'Walter', score: 2, included: true, bio: 'Forward', matches: 8 },
+      { name: 'Xander', score: 5, included: true, bio: 'Goalkeeper', matches: 15 },
+      { name: 'Yvonne', score: 1, included: true, bio: 'Defender', matches: 5 },
     ],
   ]);
 
@@ -61,7 +64,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
       const teamScores = prevNames.map(team => team.reduce((acc, player) => acc + player.score, 0));
       const minScoreIndex = teamScores.indexOf(Math.min(...teamScores));
       const newNames = [...prevNames];
-      newNames[minScoreIndex] = [...newNames[minScoreIndex], { name, score, included: true }];
+      newNames[minScoreIndex] = [...newNames[minScoreIndex], { name, score, included: true, bio: '', matches: 0 }];
       return newNames;
     });
   };
@@ -84,8 +87,18 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     setTeams(newTeamArray);
   };
 
+  const updatePlayer = (name: string, newName: string, newScore: number, newBio: string, newMatches: number) => {
+    setNames((prevNames) =>
+      prevNames.map((team) =>
+        team.map((player) =>
+          player.name === name ? { ...player, name: newName, score: newScore, bio: newBio, matches: newMatches } : player
+        )
+      )
+    );
+  };
+
   return (
-    <NamesContext.Provider value={{ names, teams, addName, setNames, togglePlayerIncluded, saveTeams }}>
+    <NamesContext.Provider value={{ names, teams, addName, setNames, togglePlayerIncluded, saveTeams, updatePlayer }}>
       {children}
     </NamesContext.Provider>
   );

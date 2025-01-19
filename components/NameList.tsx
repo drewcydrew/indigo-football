@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, FlatList, ListRenderItem, StyleSheet } from 'react-native';
-import { Text } from './Themed';
+import React, { useState } from 'react';
+import { View, FlatList, StyleSheet, TouchableOpacity, Text, useColorScheme } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import { useNames } from '../context/NamesContext';
 
@@ -10,8 +9,15 @@ interface Player {
 }
 
 const NameList = () => {
-  const { names, togglePlayerIncluded } = useNames();
+  const { names, togglePlayerIncluded, setAllIncluded } = useNames();
   const flatNames: Player[] = names.flat();
+  const [allSelected, setAllSelected] = useState(false);
+  const colorScheme = useColorScheme(); // Get the current color scheme
+
+  const handleSelectAll = () => {
+    setAllIncluded(!allSelected);
+    setAllSelected(!allSelected);
+  };
 
   const renderName = (player: Player) => (
     <View style={styles.nameContainer}>
@@ -20,9 +26,9 @@ const NameList = () => {
         onPress={() => togglePlayerIncluded(player.name)}
         checkedIcon="dot-circle-o"
         uncheckedIcon="circle-o"
-        textStyle={{ color: 'black' }}
+        textStyle={{ color: colorScheme === 'dark' ? 'white' : 'black' }}
       />
-      <Text style={styles.text}>
+      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>
         {player.name}
       </Text>
     </View>
@@ -48,12 +54,17 @@ const NameList = () => {
   }, []);
 
   return (
-    <FlatList
-      data={groupedNames}
-      renderItem={renderRow}
-      keyExtractor={(item, index) => index.toString()}
-      contentContainerStyle={styles.container}
-    />
+    <View>
+      <TouchableOpacity onPress={handleSelectAll} style={styles.selectButton}>
+        <Text style={styles.buttonText}>{allSelected ? 'Deselect All' : 'Select All'}</Text>
+      </TouchableOpacity>
+      <FlatList
+        data={groupedNames}
+        renderItem={renderRow}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={styles.container}
+      />
+    </View>
   );
 };
 
@@ -81,6 +92,17 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 24,
     paddingLeft: 5,
+  },
+  selectButton: {
+    padding: 10,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+    alignItems: 'center',
+    margin: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 

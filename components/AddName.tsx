@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, View, Modal, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, TextInput, View, Modal, TouchableOpacity, Text, useColorScheme } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons'; // Ensure correct import
+import Slider from '@react-native-community/slider'; // Import Slider component
 
 const AddName = ({ onAdd }: { onAdd: (name: string, score: number) => void }) => {
   const [name, setName] = useState('');
-  const [score, setScore] = useState('');
+  const [score, setScore] = useState(1); // Initialize score as a number
   const [modalVisible, setModalVisible] = useState(false);
+  const colorScheme = useColorScheme(); // Get the current color scheme
 
   const handleAdd = () => {
-    const parsedScore = parseInt(score, 10);
-    if (name.trim() && !isNaN(parsedScore)) {
-      onAdd(name, parsedScore);
+    if (name.trim()) {
+      onAdd(name, score);
       setName('');
-      setScore('');
+      setScore(1);
       setModalVisible(false);
     }
   };
@@ -29,19 +30,21 @@ const AddName = ({ onAdd }: { onAdd: (name: string, score: number) => void }) =>
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
+          <View style={[styles.modalView, { backgroundColor: colorScheme === 'dark' ? '#333' : '#fff' }]}>
             <TextInput
               style={styles.input}
               placeholder="Enter name"
               value={name}
               onChangeText={setName}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Enter score"
+            <Text>Score: {score}</Text>
+            <Slider
+              style={styles.slider}
+              minimumValue={1}
+              maximumValue={5}
+              step={1}
               value={score}
-              onChangeText={setScore}
-              keyboardType="numeric"
+              onValueChange={setScore}
             />
             <View style={styles.buttonContainer}>
               <TouchableOpacity onPress={handleAdd} style={styles.button}>
@@ -68,7 +71,6 @@ const styles = StyleSheet.create({
   modalView: {
     width: 300,
     padding: 20,
-    backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',
   },
@@ -96,6 +98,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+    marginVertical: 10,
   },
 });
 

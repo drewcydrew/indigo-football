@@ -21,6 +21,7 @@ interface NamesContextType {
   togglePlayerIncluded: (name: string) => void;
   saveTeams: (newTeams: Player[][]) => void;
   updatePlayer: (name: string, newName: string, newScore: number, newBio: string, newMatches: number) => void;
+  setAllIncluded: (included: boolean) => void;
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
@@ -97,8 +98,16 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const setAllIncluded = (included: boolean) => {
+    setNames((prevNames) =>
+      prevNames.map((team) =>
+        team.map((player) => ({ ...player, included }))
+      )
+    );
+  };
+
   return (
-    <NamesContext.Provider value={{ names, teams, addName, setNames, togglePlayerIncluded, saveTeams, updatePlayer }}>
+    <NamesContext.Provider value={{ names, teams, addName, setNames, togglePlayerIncluded, saveTeams, updatePlayer, setAllIncluded }}>
       {children}
     </NamesContext.Provider>
   );

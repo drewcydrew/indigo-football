@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Modal, TouchableOpacity, Text } from 'react-native';
-import { Slider } from 'react-native-elements';
+import { StyleSheet, View, Modal, TouchableOpacity, Text, useColorScheme, Switch } from 'react-native';
+import Slider from '@react-native-community/slider'; // Import Slider component
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNames, Player } from '../context/NamesContext';
-import { CheckBox } from 'react-native-elements'; // Import CheckBox
 
 const RandomizeTeams = ({ showScores, setShowScores }: { showScores: boolean, setShowScores: (value: boolean) => void }) => {
   const { names, saveTeams } = useNames();
   const [modalVisible, setModalVisible] = useState(false);
   const [numTeams, setNumTeams] = useState(2);
   const [algorithm, setAlgorithm] = useState('scores'); // State to select algorithm
+  const colorScheme = useColorScheme(); // Get the current color scheme
 
   const randomizeTeams = () => {
     const allPlayers = [...names.flat()].filter(player => player.included).sort(() => Math.random() - 0.5);
@@ -48,7 +48,7 @@ const RandomizeTeams = ({ showScores, setShowScores }: { showScores: boolean, se
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
+          <View style={[styles.modalView, { backgroundColor: colorScheme === 'dark' ? '#333' : '#fff' }]}>
             <Text style={styles.modalText}>Randomize Teams</Text>
             <Text>Number of Teams: {numTeams}</Text>
             <Slider
@@ -68,18 +68,21 @@ const RandomizeTeams = ({ showScores, setShowScores }: { showScores: boolean, se
               <Picker.Item label="Evenly Distribute Scores" value="scores" />
               <Picker.Item label="Evenly Distribute Players" value="players" />
             </Picker>
-            <CheckBox
-              title="Show Scores"
-              checked={showScores}
-              onPress={() => setShowScores(!showScores)}
-              // Use default parameters instead of defaultProps
-              checkedIcon="dot-circle-o"
-              uncheckedIcon="circle-o"
-              textStyle={{ color: 'black' }} // Add default text color
-            />
-            <TouchableOpacity onPress={randomizeTeams} style={styles.button}>
-              <Text style={styles.buttonText}>OK</Text>
-            </TouchableOpacity>
+            <View style={styles.switchContainer}>
+              <Text style={[styles.switchLabel, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Show Scores</Text>
+              <Switch
+                value={showScores}
+                onValueChange={setShowScores}
+              />
+            </View>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity onPress={randomizeTeams} style={styles.button}>
+                <Text style={styles.buttonText}>OK</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.button}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -104,7 +107,6 @@ const styles = StyleSheet.create({
   modalView: {
     width: 300,
     padding: 20,
-    backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',
   },
@@ -114,7 +116,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   slider: {
-    width: '80%',
+    width: '100%',
+    height: 40,
     marginVertical: 10,
   },
   picker: {
@@ -122,12 +125,27 @@ const styles = StyleSheet.create({
     height: 50,
     marginVertical: 10,
   },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  switchLabel: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
   button: {
+    flex: 1,
     alignItems: 'center',
     padding: 10,
+    marginHorizontal: 5,
     backgroundColor: '#007bff',
     borderRadius: 5,
-    marginTop: 20,
   },
   buttonText: {
     color: 'white',

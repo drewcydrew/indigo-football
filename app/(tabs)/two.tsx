@@ -11,10 +11,10 @@ export default function TabTwoScreen() {
 
   return (
     <View style={styles.container}>
+      <TeamSplitter showScores={showScores} />
       <View style={styles.randomizeTeamsWrapper}>
         <RandomizeTeams showScores={showScores} setShowScores={setShowScores} />
       </View>
-      <TeamSplitter showScores={showScores} />
     </View>
   );
 }
@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%', // Ensure full width
   },
   title: {
     fontSize: 20,
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
   },
   randomizeTeamsWrapper: {
     position: 'absolute',
-    top: 10,
+    bottom: 10, // Position at the bottom
     right: 10,
   },
 });

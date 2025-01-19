@@ -8,7 +8,7 @@ export interface Player {
   matches: number; // New field for number of matches
 }
 
-interface Team {
+export interface Team {
   id: number;
   players: Player[];
 }

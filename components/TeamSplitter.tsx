@@ -6,11 +6,12 @@ import { useThemeColor } from './Themed';
 const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
   const { teams } = useNames();
   const textColor = useThemeColor({}, 'text');
+  const backgroundColor = useThemeColor({}, 'background');
 
   const renderTeam: ListRenderItem<Team> = ({ item: team }) => {
     const totalScore = team.players.reduce((acc: number, player: Player) => acc + player.score, 0);
     return (
-      <View style={styles.teamContainer}>
+      <View style={[styles.teamContainer, { backgroundColor }]}>
         <Text style={[styles.teamTitle, { color: textColor }]}>Team {team.id + 1}</Text>
         {showScores && (
           <Text style={[styles.totalScoreText, { color: textColor }]}>Total Score: {totalScore}</Text>
@@ -57,11 +58,13 @@ const styles = StyleSheet.create({
   container: {
     padding: 10,
     flexGrow: 1,
+    width: '100%', // Ensure full width
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
+    width: '100%', // Ensure full width
   },
   column: {
     flex: 1,
@@ -70,7 +73,6 @@ const styles = StyleSheet.create({
   teamContainer: {
     alignItems: 'center',
     padding: 10,
-    backgroundColor: '#f0f0f0',
     borderRadius: 5,
     flex: 1,
   },

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, FlatList, ListRenderItem } from 'react-native';
 import { Text } from './Themed';
-import { CheckBox } from 'react-native-elements';
 import { useNames, Player } from '../context/NamesContext';
 import PlayerEditModal from './PlayerEditModal';
 
@@ -10,7 +9,6 @@ const PlayerDisplay = () => {
   const flatNames = names.flat();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [showScores, setShowScores] = useState(false);
 
   const openModal = (player: Player) => {
     setSelectedPlayer(player);
@@ -31,7 +29,7 @@ const PlayerDisplay = () => {
   const renderPlayer = (player: Player) => (
     <View style={styles.playerContainer}>
       <Text style={styles.text} onPress={() => openModal(player)}>
-        {player.name} {showScores && `(${player.score})`}
+        {player.name}
       </Text>
     </View>
   );
@@ -57,14 +55,6 @@ const PlayerDisplay = () => {
 
   return (
     <View style={styles.container}>
-      <CheckBox
-        title="Show Scores"
-        checked={showScores}
-        onPress={() => setShowScores(!showScores)}
-        checkedIcon="dot-circle-o"
-        uncheckedIcon="circle-o"
-        textStyle={{ color: 'black' }}
-      />
       <FlatList
         data={groupedPlayers}
         renderItem={renderRow}
@@ -85,14 +75,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    width: '100%', // Ensure full width
   },
   scrollView: {
-    padding: 10,
+    padding: 0,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
+    width: '100%', // Ensure full width
   },
   column: {
     flex: 1,
@@ -106,7 +98,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 17,
     lineHeight: 24,
-    paddingLeft: 10,
+    paddingLeft: 0,
   },
 });
 

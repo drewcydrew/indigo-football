@@ -59,26 +59,28 @@ const NameList = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    padding: 5,
+    width: '100%', // Ensure full width
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 5,
+    width: '100%', // Ensure full width
   },
   column: {
     flex: 1,
-    marginHorizontal: 5,
+    marginHorizontal: 2,
   },
   nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 5,
+    paddingVertical: 2,
   },
   text: {
     fontSize: 17,
     lineHeight: 24,
-    paddingLeft: 10,
+    paddingLeft: 5,
   },
 });
 

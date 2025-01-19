@@ -9,8 +9,8 @@ import AddName from '@/components/AddName'; // Import AddName
 export default function TabFourScreen() {
   return (
     <View style={styles.container}>
-      <AddNameWrapper />
       <PlayerDisplay />
+      <AddNameWrapper />
     </View>
   );
 }
@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%', // Ensure full width
   },
   title: {
     fontSize: 20,
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
   },
   addNameWrapper: {
     position: 'absolute',
-    top: 10,
+    bottom: 10, // Position at the bottom
     right: 10,
   },
 });

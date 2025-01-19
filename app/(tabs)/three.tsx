@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%', // Ensure full width
   },
   title: {
     fontSize: 20,

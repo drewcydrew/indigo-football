@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface Player {
   name: string;
@@ -22,43 +23,121 @@ interface NamesContextType {
   saveTeams: (newTeams: Player[][]) => void;
   updatePlayer: (name: string, newName: string, newScore: number, newBio: string, newMatches: number) => void;
   setAllIncluded: (included: boolean) => void;
+  showScores: boolean; // Add showScores
+  setShowScores: (value: boolean) => void; // Add setShowScores
+  numTeams: number; // Add numTeams
+  setNumTeams: (value: number) => void; // Add setNumTeams
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
 
-export const NamesProvider = ({ children }: { children: ReactNode }) => {
-  const [names, setNames] = useState<Player[][]>([
-    [
-      { name: 'Alice', score: 3, included: true, bio: 'Forward', matches: 10 },
-      { name: 'Bob', score: 4, included: true, bio: 'Defender', matches: 12 },
-      { name: 'Charlie', score: 2, included: true, bio: 'Midfielder', matches: 8 },
-      { name: 'David', score: 5, included: true, bio: 'Goalkeeper', matches: 15 },
-      { name: 'Eve', score: 1, included: true, bio: 'Forward', matches: 5 },
-    ],
-    [
-      { name: 'Frank', score: 3, included: true, bio: 'Defender', matches: 10 },
-      { name: 'Grace', score: 4, included: true, bio: 'Midfielder', matches: 12 },
-      { name: 'Heidi', score: 2, included: true, bio: 'Forward', matches: 8 },
-      { name: 'Ivan', score: 5, included: true, bio: 'Goalkeeper', matches: 15 },
-      { name: 'Judy', score: 1, included: true, bio: 'Defender', matches: 5 },
-    ],
-    [
-      { name: 'Mallory', score: 3, included: true, bio: 'Forward', matches: 10 },
-      { name: 'Niaj', score: 4, included: true, bio: 'Defender', matches: 12 },
-      { name: 'Olivia', score: 2, included: true, bio: 'Midfielder', matches: 8 },
-      { name: 'Peggy', score: 5, included: true, bio: 'Goalkeeper', matches: 15 },
-      { name: 'Sybil', score: 1, included: true, bio: 'Forward', matches: 5 },
-    ],
-    [
-      { name: 'Trent', score: 3, included: true, bio: 'Defender', matches: 10 },
-      { name: 'Victor', score: 4, included: true, bio: 'Midfielder', matches: 12 },
-      { name: 'Walter', score: 2, included: true, bio: 'Forward', matches: 8 },
-      { name: 'Xander', score: 5, included: true, bio: 'Goalkeeper', matches: 15 },
-      { name: 'Yvonne', score: 1, included: true, bio: 'Defender', matches: 5 },
-    ],
-  ]);
+const isAsyncStorageAvailable = async () => {
+  try {
+    const testKey = '__test__';
+    await AsyncStorage.setItem(testKey, testKey);
+    await AsyncStorage.removeItem(testKey);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
 
+const initialNames: Player[][] = [
+  [
+    { name: 'Bernie', score: 3, included: true, bio: 'A seasoned forward with a knack for scoring.', matches: 10 },
+    { name: 'Sandy', score: 3, included: true, bio: 'A reliable defender known for strong tackles.', matches: 12 },
+    { name: 'Jon', score: 3, included: true, bio: 'A versatile midfielder with great vision.', matches: 8 },
+    { name: 'John', score: 3, included: true, bio: 'A goalkeeper with quick reflexes.', matches: 15 },
+    { name: 'Sal', score: 3, included: true, bio: 'A forward with a powerful shot.', matches: 5 },
+  ],
+  [
+    { name: 'Harry', score: 3, included: true, bio: 'A defender who excels in aerial duels.', matches: 10 },
+    { name: 'Peter', score: 3, included: true, bio: 'A midfielder with excellent passing skills.', matches: 12 },
+    { name: 'Denis', score: 3, included: true, bio: 'A forward known for his speed.', matches: 8 },
+    { name: 'John N', score: 3, included: true, bio: 'A goalkeeper with great command of the box.', matches: 15 },
+    { name: 'Michel', score: 3, included: true, bio: 'A defender with a strong presence.', matches: 5 },
+  ],
+  [
+    { name: 'Mike', score: 3, included: true, bio: 'A forward with a keen eye for goal.', matches: 10 },
+    { name: 'Michael', score: 3, included: true, bio: 'A midfielder who controls the tempo of the game.', matches: 12 },
+    { name: 'John H', score: 3, included: true, bio: 'A versatile player who can play multiple positions.', matches: 8 },
+    { name: 'Frank', score: 3, included: true, bio: 'A goalkeeper known for his shot-stopping ability.', matches: 15 },
+    { name: 'Emilio', score: 3, included: true, bio: 'A forward with excellent dribbling skills.', matches: 5 },
+  ],
+  [
+    { name: 'Enrique', score: 3, included: true, bio: 'A midfielder with great stamina.', matches: 10 },
+    { name: 'Terry', score: 3, included: true, bio: 'A defender who reads the game well.', matches: 12 },
+  ],
+];
+
+export const NamesProvider = ({ children }: { children: ReactNode }) => {
+  const [names, setNames] = useState<Player[][]>(initialNames);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [showScores, setShowScores] = useState(true);
+  const [numTeams, setNumTeams] = useState(2);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const savedNames = await AsyncStorage.getItem('names');
+        const savedTeams = await AsyncStorage.getItem('teams');
+        const savedShowScores = await AsyncStorage.getItem('showScores');
+        const savedNumTeams = await AsyncStorage.getItem('numTeams');
+
+        if (savedNames !== null) setNames(JSON.parse(savedNames));
+        if (savedTeams !== null) setTeams(JSON.parse(savedTeams));
+        if (savedShowScores !== null) setShowScores(JSON.parse(savedShowScores));
+        if (savedNumTeams !== null) setNumTeams(JSON.parse(savedNumTeams));
+      } catch (error) {
+        console.error('Failed to load data from AsyncStorage', error);
+      }
+    };
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const saveData = async () => {
+      try {
+        await AsyncStorage.setItem('names', JSON.stringify(names));
+      } catch (error) {
+        console.error('Failed to save names to AsyncStorage', error);
+      }
+    };
+    saveData();
+  }, [names]);
+
+  useEffect(() => {
+    const saveData = async () => {
+      try {
+        await AsyncStorage.setItem('teams', JSON.stringify(teams));
+      } catch (error) {
+        console.error('Failed to save teams to AsyncStorage', error);
+      }
+    };
+    saveData();
+  }, [teams]);
+
+  useEffect(() => {
+    const saveData = async () => {
+      try {
+        await AsyncStorage.setItem('showScores', JSON.stringify(showScores));
+      } catch (error) {
+        console.error('Failed to save showScores to AsyncStorage', error);
+      }
+    };
+    saveData();
+  }, [showScores]);
+
+  useEffect(() => {
+    const saveData = async () => {
+      try {
+        await AsyncStorage.setItem('numTeams', JSON.stringify(numTeams));
+      } catch (error) {
+        console.error('Failed to save numTeams to AsyncStorage', error);
+      }
+    };
+    saveData();
+  }, [numTeams]);
 
   const addName = (name: string, score: number) => {
     setNames((prevNames) => {
@@ -107,7 +186,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <NamesContext.Provider value={{ names, teams, addName, setNames, togglePlayerIncluded, saveTeams, updatePlayer, setAllIncluded }}>
+    <NamesContext.Provider value={{ names, teams, addName, setNames, togglePlayerIncluded, saveTeams, updatePlayer, setAllIncluded, showScores, setShowScores, numTeams, setNumTeams }}>
       {children}
     </NamesContext.Provider>
   );

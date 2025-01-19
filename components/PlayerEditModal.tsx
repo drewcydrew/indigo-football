@@ -8,14 +8,15 @@ interface PlayerEditModalProps {
   visible: boolean;
   player: Player | null;
   onClose: () => void;
-  onSave: (name: string, score: number, bio: string, matches: number) => void;
+  onSave: (name: string, score: number, bio: string) => void;
 }
 
 const PlayerEditModal: React.FC<PlayerEditModalProps> = ({ visible, player, onClose, onSave }) => {
+  console.log('PlayerEditModal props:', { visible, player, onClose, onSave }); // Add console log
+
   const [editedName, setEditedName] = React.useState(player?.name || '');
   const [editedScore, setEditedScore] = React.useState(player?.score || 1);
   const [editedBio, setEditedBio] = React.useState(player?.bio || '');
-  const [editedMatches, setEditedMatches] = React.useState(player?.matches || 0);
   const colorScheme = useColorScheme(); // Get the current color scheme
 
   React.useEffect(() => {
@@ -23,12 +24,11 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({ visible, player, onCl
       setEditedName(player.name);
       setEditedScore(player.score);
       setEditedBio(player.bio);
-      setEditedMatches(player.matches);
     }
   }, [player]);
 
   const handleSave = () => {
-    onSave(editedName, editedScore, editedBio, editedMatches);
+    onSave(editedName, editedScore, editedBio); // Remove matches from handleSave
     onClose();
   };
 
@@ -58,17 +58,12 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({ visible, player, onCl
             style={styles.slider}
           />
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.textArea]} // Add textArea style
             value={editedBio}
             onChangeText={setEditedBio}
             placeholder="Bio"
-          />
-          <TextInput
-            style={styles.input}
-            value={editedMatches.toString()}
-            onChangeText={(text) => setEditedMatches(parseInt(text))}
-            placeholder="Matches"
-            keyboardType="numeric"
+            multiline={true} // Enable multiline input
+            numberOfLines={4} // Set number of lines
           />
           <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={handleSave} style={styles.button}>
@@ -104,6 +99,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
+  textArea: {
+    height: 100, // Set height for text area
+    textAlignVertical: 'top', // Align text to the top
+  },
   slider: {
     width: '100%',
     marginVertical: 10,
@@ -120,6 +119,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     backgroundColor: '#007bff',
     borderRadius: 5,
+  },
+  deleteButton: {
+    backgroundColor: '#ff4d4d',
+    marginTop: 10,
   },
   buttonText: {
     color: 'white',

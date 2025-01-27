@@ -9,9 +9,10 @@ interface PlayerEditModalProps {
   player: Player | null;
   onClose: () => void;
   onSave: (name: string, score: number, bio: string) => void;
+  onDelete?: (player: Player) => void;  // Add new prop
 }
 
-const PlayerEditModal: React.FC<PlayerEditModalProps> = ({ visible, player, onClose, onSave }) => {
+const PlayerEditModal: React.FC<PlayerEditModalProps> = ({ visible, player, onClose, onSave, onDelete }) => {
   console.log('PlayerEditModal props:', { visible, player, onClose, onSave }); // Add console log
 
   const [editedName, setEditedName] = React.useState(player?.name || '');
@@ -30,6 +31,13 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({ visible, player, onCl
   const handleSave = () => {
     onSave(editedName, editedScore, editedBio); // Remove matches from handleSave
     onClose();
+  };
+
+  const handleDelete = () => {
+    if (player && onDelete) {
+      onDelete(player);
+      onClose();
+    }
   };
 
   return (
@@ -72,6 +80,12 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({ visible, player, onCl
             <TouchableOpacity onPress={onClose} style={styles.button}>
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
+          
+          {onDelete && player && (
+            <TouchableOpacity onPress={handleDelete} style={[styles.button, styles.deleteButton]}>
+              <Text style={styles.buttonText}>Delete Player</Text>
+            </TouchableOpacity>
+          )}
           </View>
         </View>
       </View>

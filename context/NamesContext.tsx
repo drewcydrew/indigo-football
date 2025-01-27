@@ -28,6 +28,7 @@ interface NamesContextType {
   setShowScores: (value: boolean) => void; // Add setShowScores
   numTeams: number; // Add numTeams
   setNumTeams: (value: number) => void; // Add setNumTeams
+  deletePlayer: (player: Player) => void; // Add deletePlayer
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
@@ -143,6 +144,14 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const deletePlayer = (player: Player) => {
+    setNames((prevNames) =>
+      prevNames.map((team) =>
+        team.filter((p) => p.name !== player.name)
+      )
+    );
+  };
+
   if (isLoading) {
     return null;
   }
@@ -161,7 +170,8 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         showScores, 
         setShowScores, 
         numTeams, 
-        setNumTeams
+        setNumTeams,
+        deletePlayer
       }}
     >
       {children}

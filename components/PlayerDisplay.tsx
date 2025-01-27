@@ -5,7 +5,7 @@ import { useNames, Player } from '../context/NamesContext';
 import PlayerEditModal from './PlayerEditModal';
 
 const PlayerDisplay = () => {
-  const { names, updatePlayer } = useNames();
+  const { names, updatePlayer, deletePlayer } = useNames(); // Add deletePlayer
   const flatNames = names.flat();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -20,10 +20,16 @@ const PlayerDisplay = () => {
     setSelectedPlayer(null);
   };
 
-  const saveChanges = (name: string, score: number, bio: string, matches: number) => {
+  const saveChanges = (name: string, score: number, bio: string) => {
     if (selectedPlayer) {
-      updatePlayer(selectedPlayer.name, name, score, bio, matches);
+      updatePlayer(selectedPlayer.name, name, score, bio, selectedPlayer.matches);
+      closeModal();
     }
+  };
+
+  const handleDelete = (player: Player) => {
+    deletePlayer(player);
+    closeModal();
   };
 
   const renderPlayer = (player: Player) => (
@@ -66,6 +72,7 @@ const PlayerDisplay = () => {
         player={selectedPlayer}
         onClose={closeModal}
         onSave={saveChanges}
+        onDelete={handleDelete}  // Add the delete handler
       />
     </View>
   );

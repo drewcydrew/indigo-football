@@ -9,6 +9,13 @@ interface RandomizeTeamsSettingsProps {
   setShowScores: (value: boolean) => void;
   numTeams: number; // Add numTeams prop
   setNumTeams: (value: number) => void; // Add setNumTeams prop
+  algorithm: string;
+  setAlgorithm: (value: string) => void;
+}
+
+interface RandomizeTeamsProps {
+  showScores: boolean;
+  setShowScores: (value: boolean) => void;
 }
 
 interface RandomizeTeamsButtonProps {
@@ -33,21 +40,16 @@ export const RandomizeTeamsButton: React.FC<RandomizeTeamsButtonProps> = ({ onRa
   );
 };
 
-export const RandomizeTeamsSettingsIcon: React.FC<RandomizeTeamsSettingsProps> = ({ showScores, setShowScores, numTeams, setNumTeams }) => {
+
+
+export const RandomizeTeamsSettingsIcon: React.FC<RandomizeTeamsSettingsProps> = ({ showScores, setShowScores, numTeams, setNumTeams, algorithm, setAlgorithm }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [localNumTeams, setLocalNumTeams] = useState(numTeams); // Local state for number of teams
-  const [algorithm, setAlgorithm] = useState('scores'); // State to select algorithm
-  const [dropdownVisible, setDropdownVisible] = useState(false); // State to toggle dropdown visibility
   const colorScheme = useColorScheme(); // Get the current color scheme
 
   const handleNumTeamsChange = (value: number) => {
     setLocalNumTeams(value);
     setNumTeams(value); // Update parent state
-  };
-
-  const handleAlgorithmChange = (value: string) => {
-    setAlgorithm(value);
-    setDropdownVisible(false); // Hide dropdown after selection
   };
 
   return (
@@ -73,24 +75,6 @@ export const RandomizeTeamsSettingsIcon: React.FC<RandomizeTeamsSettingsProps> =
               step={1}
               style={styles.slider}
             />
-            <View style={styles.dropdownContainer}>
-              <Text style={styles.dropdownLabel}>Algorithm</Text>
-              <TouchableOpacity style={styles.dropdown} onPress={() => setDropdownVisible(!dropdownVisible)}>
-                <Text style={styles.dropdownText}>
-                  {algorithm === 'scores' ? 'Evenly Distribute Scores' : 'Evenly Distribute Players'}
-                </Text>
-              </TouchableOpacity>
-              {dropdownVisible && (
-                <View style={styles.dropdownOptions}>
-                  <TouchableOpacity style={styles.dropdownOption} onPress={() => handleAlgorithmChange('scores')}>
-                    <Text style={styles.dropdownOptionText}>Evenly Distribute Scores</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.dropdownOption} onPress={() => handleAlgorithmChange('players')}>
-                    <Text style={styles.dropdownOptionText}>Evenly Distribute Players</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
             <View style={styles.switchContainer}>
               <Text style={[styles.switchLabel, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Show Scores</Text>
               <Switch
@@ -98,12 +82,16 @@ export const RandomizeTeamsSettingsIcon: React.FC<RandomizeTeamsSettingsProps> =
                 onValueChange={setShowScores}
               />
             </View>
+            <View style={styles.switchContainer}>
+              <Text style={[styles.switchLabel, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Sort by score?</Text>
+              <Switch
+                value={algorithm === 'scores'}
+                onValueChange={(val) => setAlgorithm(val ? 'scores' : 'players')}
+              />
+            </View>
             <View style={styles.buttonContainer}>
               <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.button}>
                 <Text style={styles.buttonText}>OK</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.button}>
-                <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -121,35 +109,102 @@ export const RandomizeTeamsRandomizeIcon: React.FC<RandomizeTeamsButtonProps> = 
   );
 };
 
-const RandomizeTeams = ({ showScores, setShowScores }: { showScores: boolean, setShowScores: (value: boolean) => void }) => {
+export function getRandomTeams(allPlayers: Player[], numTeams: number): Player[][] {
+  const shuffle = (array: Player[]): Player[] => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  };
+
+  if (allPlayers.length === 0) return [];
+  const shuffledPlayers = shuffle(allPlayers);
+  const minPlayersPerTeam = Math.floor(allPlayers.length / numTeams);
+  const extraPlayers = allPlayers.length % numTeams;
+  
+  const teams: Player[][] = Array(numTeams).fill([]).map(() => []);
+  let currentIndex = 0;
+
+  // First, distribute minimum players to each team
+  for (let i = 0; i < numTeams; i++) {
+    teams[i] = shuffledPlayers.slice(currentIndex, currentIndex + minPlayersPerTeam);
+    currentIndex += minPlayersPerTeam;
+  }
+
+  // Then distribute extra players one by one
+  for (let i = 0; i < extraPlayers; i++) {
+    teams[i].push(shuffledPlayers[currentIndex + i]);
+  }
+
+  return teams;
+}
+
+export function getRandomTeamsByScores(players: Player[], numTeams: number): Player[][] {
+  if (players.length === 0) return [];
+  
+  // Group and shuffle players by score as before
+  const scoreGroups: { [key: number]: Player[] } = {};
+  players.forEach(player => {
+    if (!scoreGroups[player.score]) {
+      scoreGroups[player.score] = [];
+    }
+    scoreGroups[player.score].push(player);
+  });
+
+  Object.values(scoreGroups).forEach(group => {
+    for (let i = group.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [group[i], group[j]] = [group[j], group[i]];
+    }
+  });
+
+  const sortedPlayers = Object.entries(scoreGroups)
+    .sort(([scoreA], [scoreB]) => Number(scoreB) - Number(scoreA))
+    .flatMap(([_, group]) => group);
+
+  const teams: Player[][] = Array.from({ length: numTeams }, () => []);
+  const teamScores = Array(numTeams).fill(0);
+
+  // Distribute players to teams based on lowest total score
+  sortedPlayers.forEach(player => {
+    const minScoreIndex = teamScores.indexOf(Math.min(...teamScores));
+    teams[minScoreIndex].push(player);
+    teamScores[minScoreIndex] += player.score;
+  });
+
+  return teams;
+}
+
+const RandomizeTeams: React.FC<RandomizeTeamsProps> = ({ 
+  showScores, 
+  setShowScores
+}) => {
   const { names, saveTeams } = useNames();
   const [numTeams, setNumTeams] = useState(2);
-  const [algorithm, setAlgorithm] = useState('scores'); // State to select algorithm
+  const [algorithm, setAlgorithm] = useState('players');
 
   const randomizeTeams = () => {
-    const allPlayers = [...names.flat()].filter(player => player.included).sort(() => Math.random() - 0.5);
-    const teams: Player[][] = Array.from({ length: numTeams }, () => []);
-
-    if (algorithm === 'scores') {
-      const teamScores = Array(numTeams).fill(0);
-      allPlayers.forEach(player => {
-        const minScoreIndex = teamScores.indexOf(Math.min(...teamScores));
-        teams[minScoreIndex].push(player);
-        teamScores[minScoreIndex] += player.score;
-      });
-    } else {
-      allPlayers.forEach((player, index) => {
-        teams[index % numTeams].push(player);
-      });
+    const allPlayers = [...names.flat()].filter(player => player.included);
+    if (allPlayers.length === 0 || allPlayers.length % numTeams !== 0) {
+      console.warn(`Cannot create ${numTeams} even teams with ${allPlayers.length} players`);
+      return;
     }
-
+    let teams: Player[][] = [];
+    if (algorithm === 'scores') {
+      teams = getRandomTeamsByScores(allPlayers, numTeams);
+    } else {
+      teams = getRandomTeams(allPlayers, numTeams);
+    }
     saveTeams(teams);
   };
 
+  
   return (
     <View style={styles.container}>
       <View style={styles.bottomLeft}>
-        <RandomizeTeamsSettingsIcon showScores={showScores} setShowScores={setShowScores} setNumTeams={setNumTeams} numTeams={numTeams} />
+        <RandomizeTeamsSettingsIcon showScores={showScores} setShowScores={setShowScores} setNumTeams={setNumTeams} numTeams={numTeams} algorithm={algorithm} setAlgorithm={setAlgorithm} />
       </View>
       <View style={styles.bottomRight}>
         <RandomizeTeamsRandomizeIcon onRandomize={randomizeTeams} />

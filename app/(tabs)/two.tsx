@@ -7,6 +7,7 @@ import TeamSplitter from '@/components/TeamSplitter'; // Import TeamSplitter
 import { RandomizeTeamsSettingsIcon, RandomizeTeamsRandomizeIcon } from '@/components/RandomizeTeams'; // Import new components
 import { useNames, Player } from '@/context/NamesContext'; // Import useNames
 import PlayerEditModal from '@/components/PlayerEditModal'; // Import PlayerEditModal
+import { getRandomTeams, getRandomTeamsByScores } from '@/components/RandomizeTeams'; // Import helper
 
 export default function TabTwoScreen() {
   const [showScores, setShowScores] = useState(true); // State to toggle scores
@@ -14,18 +15,20 @@ export default function TabTwoScreen() {
   const { names, saveTeams, updatePlayer } = useNames(); // Use context to get names, saveTeams, and updatePlayer
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null); // State to manage selected player
   const [modalVisible, setModalVisible] = useState(false); // State to manage modal visibility
+  const [algorithm, setAlgorithm] = useState('scores');
 
   const handleRandomize = () => {
-    const allPlayers = [...names.flat()].filter(player => player.included).sort(() => Math.random() - 0.5);
-    const teams: Player[][] = Array.from({ length: numTeams }, () => []);
-
-    const teamScores = Array(numTeams).fill(0);
-    allPlayers.forEach(player => {
-      const minScoreIndex = teamScores.indexOf(Math.min(...teamScores));
-      teams[minScoreIndex].push(player);
-      teamScores[minScoreIndex] += player.score;
-    });
-
+    const allPlayers = [...names.flat()].filter(player => player.included);
+    let teams: Player[][] = [];
+    if (algorithm === 'scores') {
+      teams = getRandomTeamsByScores(allPlayers, numTeams);
+    } else {
+      teams = getRandomTeams(allPlayers, numTeams);
+    }
+    if (teams.length === 0) {
+      console.warn('No players available to create teams');
+      return;
+    }
     saveTeams(teams);
   };
 
@@ -46,7 +49,14 @@ export default function TabTwoScreen() {
       <TeamSplitter showScores={showScores} />
       <View style={styles.randomizeTeamsWrapper}>
         <RandomizeTeamsRandomizeIcon onRandomize={handleRandomize} />
-        <RandomizeTeamsSettingsIcon numTeams={numTeams} setNumTeams={setNumTeams} showScores={showScores} setShowScores={setShowScores} />
+        <RandomizeTeamsSettingsIcon 
+          numTeams={numTeams} 
+          setNumTeams={setNumTeams} 
+          showScores={showScores} 
+          setShowScores={setShowScores} 
+          algorithm={algorithm} 
+          setAlgorithm={setAlgorithm} 
+        />
       </View>
       <PlayerEditModal
         visible={modalVisible}

@@ -1,6 +1,14 @@
-import * as React from 'react';
-import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { saveToStorage, loadFromStorage } from '../utils/crossPlatformStorage';
+import * as React from "react";
+import {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
+import { saveToStorage, loadFromStorage } from "../utils/crossPlatformStorage";
+import { db } from "../firebase/config";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 export interface Player {
   name: string;
@@ -8,6 +16,11 @@ export interface Player {
   included: boolean;
   bio: string; // New field for bio
   matches: number; // New field for number of matches
+}
+
+interface FirestorePlayer extends Player {
+  teamIndex: number;
+  playerIndex: number;
 }
 
 export interface Team {
@@ -22,42 +35,152 @@ interface NamesContextType {
   setNames: (names: Player[][]) => void;
   togglePlayerIncluded: (name: string) => void;
   saveTeams: (newTeams: Player[][]) => void;
-  updatePlayer: (name: string, newName: string, newScore: number, newBio: string, newMatches: number) => void;
+  updatePlayer: (
+    name: string,
+    newName: string,
+    newScore: number,
+    newBio: string,
+    newMatches: number
+  ) => void;
   setAllIncluded: (included: boolean) => void;
   showScores: boolean; // Add showScores
   setShowScores: (value: boolean) => void; // Add setShowScores
   numTeams: number; // Add numTeams
   setNumTeams: (value: number) => void; // Add setNumTeams
   deletePlayer: (player: Player) => void; // Add deletePlayer
+  saveToFirestore: () => Promise<void>;
+  loadFromFirestore: () => Promise<void>;
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
 
 const initialNames: Player[][] = [
   [
-    { name: 'Bernie', score: 3, included: true, bio: 'A seasoned forward with a knack for scoring.', matches: 10 },
-    { name: 'Sandy', score: 3, included: true, bio: 'A reliable defender known for strong tackles.', matches: 12 },
-    { name: 'Jon', score: 3, included: true, bio: 'A versatile midfielder with great vision.', matches: 8 },
-    { name: 'John', score: 3, included: true, bio: 'A goalkeeper with quick reflexes.', matches: 15 },
-    { name: 'Sal', score: 3, included: true, bio: 'A forward with a powerful shot.', matches: 5 },
+    {
+      name: "Bernie",
+      score: 3,
+      included: true,
+      bio: "A seasoned forward with a knack for scoring.",
+      matches: 10,
+    },
+    {
+      name: "Sandy",
+      score: 3,
+      included: true,
+      bio: "A reliable defender known for strong tackles.",
+      matches: 12,
+    },
+    {
+      name: "Jon",
+      score: 3,
+      included: true,
+      bio: "A versatile midfielder with great vision.",
+      matches: 8,
+    },
+    {
+      name: "John",
+      score: 3,
+      included: true,
+      bio: "A goalkeeper with quick reflexes.",
+      matches: 15,
+    },
+    {
+      name: "Sal",
+      score: 3,
+      included: true,
+      bio: "A forward with a powerful shot.",
+      matches: 5,
+    },
   ],
   [
-    { name: 'Harry', score: 3, included: true, bio: 'A defender who excels in aerial duels.', matches: 10 },
-    { name: 'Peter', score: 3, included: true, bio: 'A midfielder with excellent passing skills.', matches: 12 },
-    { name: 'Denis', score: 3, included: true, bio: 'A forward known for his speed.', matches: 8 },
-    { name: 'John N', score: 3, included: true, bio: 'A goalkeeper with great command of the box.', matches: 15 },
-    { name: 'Michel', score: 3, included: true, bio: 'A defender with a strong presence.', matches: 5 },
+    {
+      name: "Harry",
+      score: 3,
+      included: true,
+      bio: "A defender who excels in aerial duels.",
+      matches: 10,
+    },
+    {
+      name: "Peter",
+      score: 3,
+      included: true,
+      bio: "A midfielder with excellent passing skills.",
+      matches: 12,
+    },
+    {
+      name: "Denis",
+      score: 3,
+      included: true,
+      bio: "A forward known for his speed.",
+      matches: 8,
+    },
+    {
+      name: "John N",
+      score: 3,
+      included: true,
+      bio: "A goalkeeper with great command of the box.",
+      matches: 15,
+    },
+    {
+      name: "Michel",
+      score: 3,
+      included: true,
+      bio: "A defender with a strong presence.",
+      matches: 5,
+    },
   ],
   [
-    { name: 'Mike', score: 3, included: true, bio: 'A forward with a keen eye for goal.', matches: 10 },
-    { name: 'Michael', score: 3, included: true, bio: 'A midfielder who controls the tempo of the game.', matches: 12 },
-    { name: 'John H', score: 3, included: true, bio: 'A versatile player who can play multiple positions.', matches: 8 },
-    { name: 'Frank', score: 3, included: true, bio: 'A goalkeeper known for his shot-stopping ability.', matches: 15 },
-    { name: 'Emilio', score: 3, included: true, bio: 'A forward with excellent dribbling skills.', matches: 5 },
+    {
+      name: "Mike",
+      score: 3,
+      included: true,
+      bio: "A forward with a keen eye for goal.",
+      matches: 10,
+    },
+    {
+      name: "Michael",
+      score: 3,
+      included: true,
+      bio: "A midfielder who controls the tempo of the game.",
+      matches: 12,
+    },
+    {
+      name: "John H",
+      score: 3,
+      included: true,
+      bio: "A versatile player who can play multiple positions.",
+      matches: 8,
+    },
+    {
+      name: "Frank",
+      score: 3,
+      included: true,
+      bio: "A goalkeeper known for his shot-stopping ability.",
+      matches: 15,
+    },
+    {
+      name: "Emilio",
+      score: 3,
+      included: true,
+      bio: "A forward with excellent dribbling skills.",
+      matches: 5,
+    },
   ],
   [
-    { name: 'Enrique', score: 3, included: true, bio: 'A midfielder with great stamina.', matches: 10 },
-    { name: 'Terry', score: 3, included: true, bio: 'A defender who reads the game well.', matches: 12 },
+    {
+      name: "Enrique",
+      score: 3,
+      included: true,
+      bio: "A midfielder with great stamina.",
+      matches: 10,
+    },
+    {
+      name: "Terry",
+      score: 3,
+      included: true,
+      bio: "A defender who reads the game well.",
+      matches: 12,
+    },
   ],
 ];
 
@@ -79,7 +202,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         setShowScores(savedData.showScores);
         setNumTeams(savedData.numTeams);
       } catch (error) {
-        console.warn('Error loading data:', error);
+        console.warn("Error loading data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -94,16 +217,21 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     saveToStorage({
       names,
       showScores,
-      numTeams
+      numTeams,
     });
   }, [names, showScores, numTeams, isLoading]);
 
   const addName = (name: string, score: number) => {
     setNames((prevNames) => {
-      const teamScores = prevNames.map(team => team.reduce((acc, player) => acc + player.score, 0));
+      const teamScores = prevNames.map((team) =>
+        team.reduce((acc, player) => acc + player.score, 0)
+      );
       const minScoreIndex = teamScores.indexOf(Math.min(...teamScores));
       const newNames = [...prevNames];
-      newNames[minScoreIndex] = [...newNames[minScoreIndex], { name, score, included: true, bio: '', matches: 0 }];
+      newNames[minScoreIndex] = [
+        ...newNames[minScoreIndex],
+        { name, score, included: true, bio: "", matches: 0 },
+      ];
       return newNames;
     });
   };
@@ -112,7 +240,9 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     setNames((prevNames) =>
       prevNames.map((team) =>
         team.map((player) =>
-          player.name === name ? { ...player, included: !player.included } : player
+          player.name === name
+            ? { ...player, included: !player.included }
+            : player
         )
       )
     );
@@ -126,11 +256,25 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     setTeams(newTeamArray);
   };
 
-  const updatePlayer = (name: string, newName: string, newScore: number, newBio: string, newMatches: number) => {
+  const updatePlayer = (
+    name: string,
+    newName: string,
+    newScore: number,
+    newBio: string,
+    newMatches: number
+  ) => {
     setNames((prevNames) =>
       prevNames.map((team) =>
         team.map((player) =>
-          player.name === name ? { ...player, name: newName, score: newScore, bio: newBio, matches: newMatches } : player
+          player.name === name
+            ? {
+                ...player,
+                name: newName,
+                score: newScore,
+                bio: newBio,
+                matches: newMatches,
+              }
+            : player
         )
       )
     );
@@ -138,18 +282,68 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
 
   const setAllIncluded = (included: boolean) => {
     setNames((prevNames) =>
-      prevNames.map((team) =>
-        team.map((player) => ({ ...player, included }))
-      )
+      prevNames.map((team) => team.map((player) => ({ ...player, included })))
     );
   };
 
   const deletePlayer = (player: Player) => {
     setNames((prevNames) =>
-      prevNames.map((team) =>
-        team.filter((p) => p.name !== player.name)
-      )
+      prevNames.map((team) => team.filter((p) => p.name !== player.name))
     );
+  };
+
+  const saveToFirestore = async () => {
+    try {
+      const processedNames = names
+        .map((team, teamIndex) => {
+          return team.map(
+            (player, playerIndex) =>
+              ({
+                ...player,
+                teamIndex,
+                playerIndex,
+              } as FirestorePlayer)
+          );
+        })
+        .flat();
+
+      await setDoc(doc(db, "teams", "current"), {
+        players: processedNames,
+        showScores,
+        numTeams,
+        lastUpdated: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error saving to Firestore:", error);
+    }
+  };
+
+  const loadFromFirestore = async () => {
+    try {
+      const docRef = doc(db, "teams", "current");
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const reconstructedNames: Player[][] = Array(numTeams)
+          .fill([])
+          .map(() => []);
+
+        (data.players as FirestorePlayer[]).forEach((player) => {
+          if (!reconstructedNames[player.teamIndex]) {
+            reconstructedNames[player.teamIndex] = [];
+          }
+          const { teamIndex, playerIndex, ...cleanPlayer } = player;
+          reconstructedNames[player.teamIndex].push(cleanPlayer);
+        });
+
+        setNames(reconstructedNames);
+        setShowScores(data.showScores);
+        setNumTeams(data.numTeams);
+      }
+    } catch (error) {
+      console.error("Error loading from Firestore:", error);
+    }
   };
 
   if (isLoading) {
@@ -157,21 +351,23 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <NamesContext.Provider 
-      value={{ 
-        names, 
-        teams, 
-        addName, 
-        setNames, 
-        togglePlayerIncluded, 
-        saveTeams, 
-        updatePlayer, 
-        setAllIncluded, 
-        showScores, 
-        setShowScores, 
-        numTeams, 
+    <NamesContext.Provider
+      value={{
+        names,
+        teams,
+        addName,
+        setNames,
+        togglePlayerIncluded,
+        saveTeams,
+        updatePlayer,
+        setAllIncluded,
+        showScores,
+        setShowScores,
+        numTeams,
         setNumTeams,
-        deletePlayer
+        deletePlayer,
+        saveToFirestore,
+        loadFromFirestore,
       }}
     >
       {children}
@@ -182,7 +378,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
 export const useNames = () => {
   const context = useContext(NamesContext);
   if (!context) {
-    throw new Error('useNames must be used within a NamesProvider');
+    throw new Error("useNames must be used within a NamesProvider");
   }
   return context;
 };

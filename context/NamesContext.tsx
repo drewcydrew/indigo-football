@@ -14,8 +14,16 @@ export interface Player {
   name: string;
   score: number;
   included: boolean;
-  bio: string; // New field for bio
-  matches: number; // New field for number of matches
+  bio: string;
+  matches: number;
+}
+
+interface StorageData {
+  names: Player[][];
+  showScores: boolean;
+  numTeams: number;
+  teamNames?: Record<number, string>;
+  teamColors?: Record<number, string>;
 }
 
 interface FirestorePlayer extends Player {
@@ -26,11 +34,14 @@ interface FirestorePlayer extends Player {
 export interface Team {
   id: number;
   players: Player[];
+  name: string;
+  color?: string; // Add color property
 }
 
 interface NamesContextType {
   names: Player[][];
   teams: Team[];
+  teamNames?: Record<number, string>; // New state for team names
   addName: (name: string, score: number) => void;
   setNames: (names: Player[][]) => void;
   togglePlayerIncluded: (name: string) => void;
@@ -42,12 +53,19 @@ interface NamesContextType {
     newBio: string,
     newMatches: number
   ) => void;
+  updatePlayerName: (
+    teamId: number,
+    playerIndex: number,
+    newName: string
+  ) => void; // Add this function
+  updateTeamName: (teamId: number, newName: string) => void;
+  updateTeamColor: (teamId: number, color: string) => void; // Add this function
   setAllIncluded: (included: boolean) => void;
-  showScores: boolean; // Add showScores
-  setShowScores: (value: boolean) => void; // Add setShowScores
-  numTeams: number; // Add numTeams
-  setNumTeams: (value: number) => void; // Add setNumTeams
-  deletePlayer: (player: Player) => void; // Add deletePlayer
+  showScores: boolean;
+  setShowScores: (value: boolean) => void;
+  numTeams: number;
+  setNumTeams: (value: number) => void;
+  deletePlayer: (player: Player) => void;
   saveToFirestore: () => Promise<void>;
   loadFromFirestore: () => Promise<void>;
 }
@@ -190,17 +208,38 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [showScores, setShowScores] = useState(true);
   const [numTeams, setNumTeams] = useState(2);
   const [isLoading, setIsLoading] = useState(true);
+  const [teamColors, setTeamColors] = useState<Record<number, string>>({});
+  const [teamNames, setTeamNames] = useState<Record<number, string>>({}); // New state for team names
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const newTeamArray = names.map((teamPlayers, index) => ({
+      id: index,
+      name: teamNames[index] || `Team ${index + 1}`, // Use stored name or default
+      players: teamPlayers,
+      color: teamColors[index] || defaultColors[index % defaultColors.length], // Use default colors
+    }));
+
+    setTeams(newTeamArray);
+  }, [names, teamColors, teamNames, isLoading]);
 
   // Load data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const savedData = await loadFromStorage();
+        const savedData = (await loadFromStorage()) as StorageData;
         if (savedData.names) {
           setNames(savedData.names);
         }
-        setShowScores(savedData.showScores);
-        setNumTeams(savedData.numTeams);
+        if (savedData.teamNames) {
+          setTeamNames(savedData.teamNames);
+        }
+        if (savedData.teamColors) {
+          setTeamColors(savedData.teamColors);
+        }
+        setShowScores(savedData.showScores ?? true);
+        setNumTeams(savedData.numTeams ?? 2);
       } catch (error) {
         console.warn("Error loading data:", error);
       } finally {
@@ -214,12 +253,16 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (isLoading) return;
 
-    saveToStorage({
+    const dataToSave: StorageData = {
       names,
       showScores,
       numTeams,
-    });
-  }, [names, showScores, numTeams, isLoading]);
+      teamNames,
+      teamColors,
+    };
+
+    saveToStorage(dataToSave);
+  }, [names, showScores, numTeams, teamNames, teamColors, isLoading]);
 
   const addName = (name: string, score: number) => {
     setNames((prevNames) => {
@@ -236,6 +279,19 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const defaultColors = [
+    "#1E88E5", // Blue
+    "#D32F2F", // Red
+    "#388E3C", // Green
+    "#FBC02D", // Yellow
+    "#F57C00", // Orange
+    "#7B1FA2", // Purple
+    "#00ACC1", // Teal
+    "#5D4037", // Brown
+    "#546E7A", // Blue Grey
+    "#E64A19", // Deep Orange
+  ];
+
   const togglePlayerIncluded = (name: string) => {
     setNames((prevNames) =>
       prevNames.map((team) =>
@@ -249,11 +305,35 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const saveTeams = (newTeams: Player[][]) => {
-    const newTeamArray = newTeams.map((team, index) => ({
-      id: index,
-      players: team,
-    }));
-    setTeams(newTeamArray);
+    setNames(newTeams);
+
+    // When new teams are created, preserve existing names and colors where possible
+    // and create defaults for new teams
+    const defaultColors = [
+      "#1E88E5", // Blue
+      "#D32F2F", // Red
+      "#388E3C", // Green
+      "#FBC02D", // Yellow
+      "#F57C00", // Orange
+      "#7B1FA2", // Purple
+      "#00ACC1", // Teal
+      "#5D4037", // Brown
+      "#546E7A", // Blue Grey
+      "#E64A19", // Deep Orange
+    ];
+
+    // Update teams with preserved names and colors
+    const updatedTeamsArray = newTeams.map((players, index) => {
+      // Try to keep existing name and color, otherwise use defaults
+      return {
+        id: index,
+        players: players,
+        name: teamNames[index] || `Team ${index + 1}`,
+        color: teamColors[index] || defaultColors[index % defaultColors.length],
+      };
+    });
+
+    setTeams(updatedTeamsArray);
   };
 
   const updatePlayer = (
@@ -280,6 +360,13 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const updateTeamName = (teamId: number, newName: string) => {
+    setTeamNames((prevNames) => ({
+      ...prevNames,
+      [teamId]: newName,
+    }));
+  };
+
   const setAllIncluded = (included: boolean) => {
     setNames((prevNames) =>
       prevNames.map((team) => team.map((player) => ({ ...player, included })))
@@ -290,6 +377,32 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     setNames((prevNames) =>
       prevNames.map((team) => team.filter((p) => p.name !== player.name))
     );
+  };
+
+  const updatePlayerName = (
+    teamId: number,
+    playerIndex: number,
+    newName: string
+  ) => {
+    setNames((prevNames) => {
+      const updatedNames = [...prevNames];
+      if (updatedNames[teamId] && updatedNames[teamId][playerIndex]) {
+        const updatedTeam = [...updatedNames[teamId]];
+        updatedTeam[playerIndex] = {
+          ...updatedTeam[playerIndex],
+          name: newName,
+        };
+        updatedNames[teamId] = updatedTeam;
+      }
+      return updatedNames;
+    });
+  };
+
+  const updateTeamColor = (teamId: number, color: string) => {
+    setTeamColors((prevColors) => ({
+      ...prevColors,
+      [teamId]: color,
+    }));
   };
 
   const saveToFirestore = async () => {
@@ -309,6 +422,8 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
 
       await setDoc(doc(db, "teams", "current"), {
         players: processedNames,
+        teamNames, // Save team names
+        teamColors, // Save team colors
         showScores,
         numTeams,
         lastUpdated: new Date().toISOString(),
@@ -338,8 +453,17 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         });
 
         setNames(reconstructedNames);
-        setShowScores(data.showScores);
-        setNumTeams(data.numTeams);
+
+        // Load team names and colors if available
+        if (data.teamNames) {
+          setTeamNames(data.teamNames);
+        }
+        if (data.teamColors) {
+          setTeamColors(data.teamColors);
+        }
+
+        setShowScores(data.showScores ?? true);
+        setNumTeams(data.numTeams ?? 2);
       }
     } catch (error) {
       console.error("Error loading from Firestore:", error);
@@ -360,6 +484,9 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         togglePlayerIncluded,
         saveTeams,
         updatePlayer,
+        updatePlayerName, // Add to provider
+        updateTeamColor, // Add to provider
+        updateTeamName,
         setAllIncluded,
         showScores,
         setShowScores,

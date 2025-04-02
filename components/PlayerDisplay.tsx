@@ -6,6 +6,8 @@ import {
   ListRenderItem,
   TouchableOpacity,
   Alert,
+  Platform,
+  Modal,
 } from "react-native";
 import { Text } from "./Themed";
 import { useNames, Player } from "../context/NamesContext";
@@ -22,6 +24,15 @@ const PlayerDisplay = () => {
   const flatNames = names.flat();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+
+  // Add states for web alert dialogs
+  const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
+  const [confirmDialogAction, setConfirmDialogAction] = useState<
+    "load" | "save"
+  >("load");
+  const [statusDialogVisible, setStatusDialogVisible] = useState(false);
+  const [statusDialogMessage, setStatusDialogMessage] = useState("");
+  const [statusDialogSuccess, setStatusDialogSuccess] = useState(true);
 
   const openModal = (player: Player) => {
     setSelectedPlayer(player);
@@ -52,51 +63,85 @@ const PlayerDisplay = () => {
   };
 
   const handleSaveToFirestore = async () => {
-    Alert.alert(
-      "Save to Cloud",
-      "Are you sure you want to save the current data to the cloud?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Save",
-          onPress: async () => {
-            try {
-              await saveToFirestore();
-              Alert.alert("Success", "Data saved to cloud successfully");
-            } catch (error) {
-              Alert.alert("Error", "Failed to save data to cloud");
-            }
+    if (Platform.OS === "web") {
+      setConfirmDialogAction("save");
+      setConfirmDialogVisible(true);
+    } else {
+      Alert.alert(
+        "Save to Cloud",
+        "Are you sure you want to save the current data to the cloud?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
           },
-        },
-      ]
-    );
+          {
+            text: "Save",
+            onPress: async () => {
+              try {
+                await saveToFirestore();
+                Alert.alert("Success", "Data saved to cloud successfully");
+              } catch (error) {
+                Alert.alert("Error", "Failed to save data to cloud");
+              }
+            },
+          },
+        ]
+      );
+    }
   };
 
   const handleLoadFromFirestore = async () => {
-    Alert.alert(
-      "Load from Cloud",
-      "This will replace your current data with the cloud version. Are you sure?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Load",
-          onPress: async () => {
-            try {
-              await loadFromFirestore();
-              Alert.alert("Success", "Data loaded from cloud successfully");
-            } catch (error) {
-              Alert.alert("Error", "Failed to load data from cloud");
-            }
+    if (Platform.OS === "web") {
+      setConfirmDialogAction("load");
+      setConfirmDialogVisible(true);
+    } else {
+      Alert.alert(
+        "Load from Cloud",
+        "This will replace your current data with the cloud version. Are you sure?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
           },
-        },
-      ]
-    );
+          {
+            text: "Load",
+            onPress: async () => {
+              try {
+                await loadFromFirestore();
+                Alert.alert("Success", "Data loaded from cloud successfully");
+              } catch (error) {
+                Alert.alert("Error", "Failed to load data from cloud");
+              }
+            },
+          },
+        ]
+      );
+    }
+  };
+
+  const handleWebAction = async () => {
+    try {
+      if (confirmDialogAction === "load") {
+        await loadFromFirestore();
+        setStatusDialogSuccess(true);
+        setStatusDialogMessage("Data loaded from cloud successfully");
+      } else {
+        await saveToFirestore();
+        setStatusDialogSuccess(true);
+        setStatusDialogMessage("Data saved to cloud successfully");
+      }
+    } catch (error) {
+      setStatusDialogSuccess(false);
+      setStatusDialogMessage(
+        confirmDialogAction === "load"
+          ? "Failed to load data from cloud"
+          : "Failed to save data to cloud"
+      );
+    }
+
+    setConfirmDialogVisible(false);
+    setStatusDialogVisible(true);
   };
 
   const renderPlayer = (player: Player) => (
@@ -157,8 +202,78 @@ const PlayerDisplay = () => {
         player={selectedPlayer}
         onClose={closeModal}
         onSave={saveChanges}
-        onDelete={handleDelete} // Add the delete handler
+        onDelete={handleDelete}
       />
+
+      {/* Web confirmation dialog */}
+      {Platform.OS === "web" && (
+        <Modal
+          transparent={true}
+          visible={confirmDialogVisible}
+          onRequestClose={() => setConfirmDialogVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                {confirmDialogAction === "load"
+                  ? "Load from Cloud"
+                  : "Save to Cloud"}
+              </Text>
+              <Text style={styles.modalText}>
+                {confirmDialogAction === "load"
+                  ? "This will replace your current data with the cloud version. Are you sure?"
+                  : "Are you sure you want to save the current data to the cloud?"}
+              </Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => setConfirmDialogVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.confirmButton]}
+                  onPress={handleWebAction}
+                >
+                  <Text style={styles.modalButtonText}>
+                    {confirmDialogAction === "load" ? "Load" : "Save"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Web status dialog */}
+      {Platform.OS === "web" && (
+        <Modal
+          transparent={true}
+          visible={statusDialogVisible}
+          onRequestClose={() => setStatusDialogVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                {statusDialogSuccess ? "Success" : "Error"}
+              </Text>
+              <Text style={styles.modalText}>{statusDialogMessage}</Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[
+                    styles.modalButton,
+                    styles.confirmButton,
+                    { width: "100%" },
+                  ]}
+                  onPress={() => setStatusDialogVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };
@@ -209,6 +324,51 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  modalText: {
+    fontSize: 14,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    width: "48%",
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#f0f0f0",
+  },
+  confirmButton: {
+    backgroundColor: "#2196F3",
+  },
+  modalButtonText: {
+    fontWeight: "bold",
+    color: "black",
   },
 });
 

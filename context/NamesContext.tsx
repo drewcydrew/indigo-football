@@ -24,6 +24,7 @@ interface StorageData {
   numTeams: number;
   teamNames?: Record<number, string>;
   teamColors?: Record<number, string>;
+  repulsors?: Repulsor[];
 }
 
 interface FirestorePlayer extends Player {
@@ -38,8 +39,17 @@ export interface Team {
   color?: string; // Add color property
 }
 
+// Add this interface to your types
+export interface Repulsor {
+  player1: string;
+  player2: string;
+}
+
 interface NamesContextType {
   names: Player[][];
+  repulsors: Repulsor[];
+  addRepulsor: (player1: string, player2: string) => void;
+  removeRepulsor: (player1: string, player2: string) => void;
   teams: Team[];
   teamNames?: Record<number, string>; // New state for team names
   addName: (name: string, score: number) => void;
@@ -210,6 +220,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [teamColors, setTeamColors] = useState<Record<number, string>>({});
   const [teamNames, setTeamNames] = useState<Record<number, string>>({}); // New state for team names
+  const [repulsors, setRepulsors] = useState<Repulsor[]>([]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -238,6 +249,11 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         if (savedData.teamColors) {
           setTeamColors(savedData.teamColors);
         }
+
+        if (savedData.repulsors) {
+          setRepulsors(savedData.repulsors);
+        }
+
         setShowScores(savedData.showScores ?? true);
         setNumTeams(savedData.numTeams ?? 2);
       } catch (error) {
@@ -259,10 +275,19 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
       numTeams,
       teamNames,
       teamColors,
+      repulsors,
     };
 
     saveToStorage(dataToSave);
-  }, [names, showScores, numTeams, teamNames, teamColors, isLoading]);
+  }, [
+    names,
+    showScores,
+    numTeams,
+    teamNames,
+    teamColors,
+    repulsors,
+    isLoading,
+  ]);
 
   const addName = (name: string, score: number) => {
     setNames((prevNames) => {
@@ -277,6 +302,33 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
       ];
       return newNames;
     });
+  };
+
+  const addRepulsor = (player1: string, player2: string) => {
+    // Sort player names alphabetically to ensure consistent storage
+    const [sortedPlayer1, sortedPlayer2] = [player1, player2].sort();
+
+    setRepulsors((prev) => {
+      // Check if this repulsor already exists
+      const exists = prev.some(
+        (r) => r.player1 === sortedPlayer1 && r.player2 === sortedPlayer2
+      );
+
+      if (exists) return prev;
+
+      return [...prev, { player1: sortedPlayer1, player2: sortedPlayer2 }];
+    });
+  };
+
+  const removeRepulsor = (player1: string, player2: string) => {
+    // Sort player names alphabetically to match storage format
+    const [sortedPlayer1, sortedPlayer2] = [player1, player2].sort();
+
+    setRepulsors((prev) =>
+      prev.filter(
+        (r) => !(r.player1 === sortedPlayer1 && r.player2 === sortedPlayer2)
+      )
+    );
   };
 
   const defaultColors = [
@@ -495,6 +547,9 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         deletePlayer,
         saveToFirestore,
         loadFromFirestore,
+        repulsors,
+        addRepulsor,
+        removeRepulsor,
       }}
     >
       {children}

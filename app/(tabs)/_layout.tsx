@@ -16,7 +16,6 @@ import SelectAllButton from "@/components/buttonmodals/SelectAllButton";
 
 import RandomizeTeamsRandomizeIcon from "@/components/buttonmodals/RandomiseTeamsRandomiseIcon";
 import RandomizeTeamsSettingsIcon from "@/components/buttonmodals/RandomizeTeamsSettingsIcon";
-import ReadMe from "./ReadMeScreen";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -31,18 +30,23 @@ export default function TabLayout() {
 
   return (
     <NamesProvider>
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-          // Disable the static render of the header on web
-          // to prevent a hydration error in React Navigation v6.
-          headerShown: useClientOnlyValue(false, true),
-        }}
-      >
+      <Tabs>
         <Tabs.Screen
           name="index"
           options={{
+            title: "App Info",
+            headerTitleAlign: "center",
+            headerShown: true,
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon name="info-circle" color={color} />
+            ), // Use flag icon
+          }}
+        />
+        <Tabs.Screen
+          name="PlayersScreen"
+          options={{
             title: "Players",
+            headerTitleAlign: "center",
             headerLeft: () => <CloudSync />,
             headerRight: () => <AddName />,
             tabBarIcon: ({ color }) => (
@@ -54,6 +58,7 @@ export default function TabLayout() {
           name="AttendanceScreen"
           options={{
             title: "Attendance",
+            headerTitleAlign: "center",
             headerRight: () => <SelectAllButton />,
             tabBarIcon: ({ color }) => (
               <TabBarIcon name="calendar" color={color} />
@@ -64,17 +69,10 @@ export default function TabLayout() {
           name="MatchesScreen"
           options={{
             title: "Matches",
+            headerTitleAlign: "center",
             headerShown: true,
             headerRight: () => <RandomizeTeamsRandomizeIcon />,
             headerLeft: () => <RandomizeTeamsSettingsIcon />,
-            tabBarIcon: ({ color }) => <TabBarIcon name="flag" color={color} />, // Use flag icon
-          }}
-        />
-        <Tabs.Screen
-          name="ReadMeScreen"
-          options={{
-            title: "Read me ",
-            headerShown: true,
             tabBarIcon: ({ color }) => <TabBarIcon name="flag" color={color} />, // Use flag icon
           }}
         />

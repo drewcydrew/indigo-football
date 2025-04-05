@@ -56,14 +56,14 @@ const RepulsorManagerButton: React.FC = () => {
   );
 
   return (
-    <View>
+    <View style={styles.container}>
       <Text
         style={[
           styles.switchLabel,
           { color: colorScheme === "dark" ? "white" : "black" },
         ]}
       >
-        Repulsors
+        Repulsors ({repulsors.length}):
       </Text>
       <TouchableOpacity
         style={styles.iconButton}
@@ -248,6 +248,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     marginTop: 5,
+  },
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   switchLabel: {
     fontSize: 16,

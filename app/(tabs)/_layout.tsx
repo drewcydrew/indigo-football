@@ -16,6 +16,7 @@ import SelectAllButton from "@/components/buttonmodals/SelectAllButton";
 
 import RandomizeTeamsRandomizeIcon from "@/components/buttonmodals/RandomiseTeamsRandomiseIcon";
 import RandomizeTeamsSettingsIcon from "@/components/buttonmodals/RandomizeTeamsSettingsIcon";
+import ReadMe from "./ReadMeScreen";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -66,6 +67,14 @@ export default function TabLayout() {
             headerShown: true,
             headerRight: () => <RandomizeTeamsRandomizeIcon />,
             headerLeft: () => <RandomizeTeamsSettingsIcon />,
+            tabBarIcon: ({ color }) => <TabBarIcon name="flag" color={color} />, // Use flag icon
+          }}
+        />
+        <Tabs.Screen
+          name="ReadMeScreen"
+          options={{
+            title: "Read me ",
+            headerShown: true,
             tabBarIcon: ({ color }) => <TabBarIcon name="flag" color={color} />, // Use flag icon
           }}
         />

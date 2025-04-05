@@ -1,5 +1,5 @@
 import React from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Ionicons } from "@expo/vector-icons";
 import { Link, Tabs } from "expo-router";
 import { Pressable } from "react-native";
 
@@ -19,10 +19,10 @@ import RandomizeTeamsSettingsIcon from "@/components/buttonmodals/RandomizeTeams
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
+  name: React.ComponentProps<typeof Ionicons>["name"];
   color: string;
 }) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+  return <Ionicons size={28} style={{ marginBottom: -3 }} {...props} />;
 }
 
 export default function TabLayout() {
@@ -38,7 +38,7 @@ export default function TabLayout() {
             headerTitleAlign: "center",
             headerShown: true,
             tabBarIcon: ({ color }) => (
-              <TabBarIcon name="info-circle" color={color} />
+              <TabBarIcon name="information-circle" color={color} />
             ), // Use flag icon
           }}
         />
@@ -50,7 +50,7 @@ export default function TabLayout() {
             headerLeft: () => <CloudSync />,
             headerRight: () => <AddName />,
             tabBarIcon: ({ color }) => (
-              <TabBarIcon name="users" color={color} />
+              <TabBarIcon name="people" color={color} />
             ), // Use users icon
           }}
         />

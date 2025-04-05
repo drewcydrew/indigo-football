@@ -58,8 +58,9 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
             <Text style={styles.modalText}>Randomize Teams</Text>
             <Text>Number of Teams: {localNumTeams}</Text>
             <Slider
-              value={localNumTeams}
-              onValueChange={handleNumTeamsChange}
+              value={numTeams}
+              onValueChange={setLocalNumTeams}
+              onSlidingComplete={setNumTeams}
               minimumValue={2}
               maximumValue={6}
               step={1}

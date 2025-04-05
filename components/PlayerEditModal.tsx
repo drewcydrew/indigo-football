@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -27,14 +27,13 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
   onSave,
   onDelete,
 }) => {
-  console.log("PlayerEditModal props:", { visible, player, onClose, onSave }); // Add console log
-
   const [editedName, setEditedName] = React.useState(player?.name || "");
   const [editedScore, setEditedScore] = React.useState(player?.score || 1);
+  const [scorePreview, setScorePreview] = React.useState(player?.score || 1);
   const [editedBio, setEditedBio] = React.useState(player?.bio || "");
   const colorScheme = useColorScheme(); // Get the current color scheme
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (player) {
       setEditedName(player.name);
       setEditedScore(player.score);
@@ -75,10 +74,11 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
             onChangeText={setEditedName}
             placeholder="Name"
           />
-          <Text>Score: {editedScore}</Text>
+          <Text>Score: {scorePreview}</Text>
           <Slider
             value={editedScore}
-            onValueChange={setEditedScore}
+            onValueChange={setScorePreview}
+            onSlidingComplete={setEditedScore}
             minimumValue={1}
             maximumValue={5}
             step={1}

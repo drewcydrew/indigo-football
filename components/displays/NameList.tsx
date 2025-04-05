@@ -1,15 +1,7 @@
 import React, { useState } from "react";
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  useColorScheme,
-} from "react-native";
+import { View, FlatList, StyleSheet, Text, useColorScheme } from "react-native";
 import { CheckBox } from "react-native-elements";
 import { useNames } from "../../context/NamesContext";
-import SelectAllButton from "../buttonmodals/SelectAllButton";
 
 interface Player {
   name: string;
@@ -27,13 +19,15 @@ const NameList = () => {
     setAllSelected(!allSelected);
   };
 
+  console.log("Rendering name list:"); // Debugging line
+
   const renderName = (player: Player) => (
     <View style={styles.nameContainer}>
       <CheckBox
         checked={player.included}
         onPress={() => togglePlayerIncluded(player.name)}
-        checkedIcon="dot-circle-o"
-        uncheckedIcon="circle-o"
+        //checkedIcon="dot-circle-o"
+        //uncheckedIcon="circle-o"
         textStyle={{ color: colorScheme === "dark" ? "white" : "black" }}
       />
       <Text

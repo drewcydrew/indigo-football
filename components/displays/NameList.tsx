@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, Text, useColorScheme } from 'react-native';
-import { CheckBox } from 'react-native-elements';
-import { useNames } from '../context/NamesContext';
+import React, { useState } from "react";
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  useColorScheme,
+} from "react-native";
+import { CheckBox } from "react-native-elements";
+import { useNames } from "../../context/NamesContext";
+import SelectAllButton from "../buttonmodals/SelectAllButton";
 
 interface Player {
   name: string;
@@ -26,9 +34,14 @@ const NameList = () => {
         onPress={() => togglePlayerIncluded(player.name)}
         checkedIcon="dot-circle-o"
         uncheckedIcon="circle-o"
-        textStyle={{ color: colorScheme === 'dark' ? 'white' : 'black' }}
+        textStyle={{ color: colorScheme === "dark" ? "white" : "black" }}
       />
-      <Text style={[styles.text, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>
+      <Text
+        style={[
+          styles.text,
+          { color: colorScheme === "dark" ? "white" : "black" },
+        ]}
+      >
         {player.name}
       </Text>
     </View>
@@ -55,9 +68,6 @@ const NameList = () => {
 
   return (
     <View>
-      <TouchableOpacity onPress={handleSelectAll} style={styles.selectButton}>
-        <Text style={styles.buttonText}>{allSelected ? 'Deselect All' : 'Select All'}</Text>
-      </TouchableOpacity>
       <FlatList
         data={groupedNames}
         renderItem={renderRow}
@@ -71,21 +81,21 @@ const NameList = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 5,
-    width: '100%', // Ensure full width
+    width: "100%", // Ensure full width
   },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 5,
-    width: '100%', // Ensure full width
+    width: "100%", // Ensure full width
   },
   column: {
     flex: 1,
     marginHorizontal: 2,
   },
   nameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 2,
   },
   text: {
@@ -95,13 +105,13 @@ const styles = StyleSheet.create({
   },
   selectButton: {
     padding: 10,
-    backgroundColor: '#007bff',
+    backgroundColor: "#007bff",
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
     margin: 10,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
 });

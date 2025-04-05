@@ -1,11 +1,12 @@
 import { StyleSheet } from "react-native";
-import { View } from "@/components/Themed";
-import PlayerDisplay from "@/components/displays/PlayerDisplay";
 
-export default function PlayerScreen() {
+import { View } from "@/components/Themed";
+import NameList from "@/components/displays/NameList";
+
+export default function AttendanceScreen() {
   return (
     <View style={styles.container}>
-      <PlayerDisplay />
+      <NameList />
     </View>
   );
 }

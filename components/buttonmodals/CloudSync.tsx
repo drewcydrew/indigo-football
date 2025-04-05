@@ -2,30 +2,22 @@ import React, { useState } from "react";
 import {
   StyleSheet,
   View,
-  FlatList,
-  ListRenderItem,
   TouchableOpacity,
   Alert,
   Platform,
   Modal,
+  Text,
 } from "react-native";
-import { Text } from "./Themed";
-import { useNames, Player } from "../context/NamesContext";
-import PlayerEditModal from "./PlayerEditModal";
+import { useNames } from "../../context/NamesContext"; // Import useNames hook
+import Icon from "react-native-vector-icons/Ionicons";
 
-const PlayerDisplay = () => {
-  const {
-    names,
-    updatePlayer,
-    deletePlayer,
-    saveToFirestore,
-    loadFromFirestore,
-  } = useNames(); // Add loadFromFirestore
-  const flatNames = names.flat();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+const CloudSync = () => {
+  const { saveToFirestore, loadFromFirestore } = useNames();
 
-  // Add states for web alert dialogs
+  // Main modal visibility state
+  const [optionsModalVisible, setOptionsModalVisible] = useState(false);
+
+  // States for web alert dialogs
   const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
   const [confirmDialogAction, setConfirmDialogAction] = useState<
     "load" | "save"
@@ -34,35 +26,9 @@ const PlayerDisplay = () => {
   const [statusDialogMessage, setStatusDialogMessage] = useState("");
   const [statusDialogSuccess, setStatusDialogSuccess] = useState(true);
 
-  const openModal = (player: Player) => {
-    setSelectedPlayer(player);
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-    setSelectedPlayer(null);
-  };
-
-  const saveChanges = (name: string, score: number, bio: string) => {
-    if (selectedPlayer) {
-      updatePlayer(
-        selectedPlayer.name,
-        name,
-        score,
-        bio,
-        selectedPlayer.matches
-      );
-      closeModal();
-    }
-  };
-
-  const handleDelete = (player: Player) => {
-    deletePlayer(player);
-    closeModal();
-  };
-
   const handleSaveToFirestore = async () => {
+    setOptionsModalVisible(false);
+
     if (Platform.OS === "web") {
       setConfirmDialogAction("save");
       setConfirmDialogVisible(true);
@@ -92,6 +58,8 @@ const PlayerDisplay = () => {
   };
 
   const handleLoadFromFirestore = async () => {
+    setOptionsModalVisible(false);
+
     if (Platform.OS === "web") {
       setConfirmDialogAction("load");
       setConfirmDialogVisible(true);
@@ -144,66 +112,51 @@ const PlayerDisplay = () => {
     setStatusDialogVisible(true);
   };
 
-  const renderPlayer = (player: Player) => (
-    <View style={styles.playerContainer}>
-      <Text style={styles.text} onPress={() => openModal(player)}>
-        {player.name}
-      </Text>
-    </View>
-  );
-
-  const renderRow = ({ item }: { item: Player[] }) => (
-    <View style={styles.row}>
-      {item.map((player, index) => (
-        <View key={index} style={styles.column}>
-          {renderPlayer(player)}
-        </View>
-      ))}
-    </View>
-  );
-
-  const groupedPlayers = flatNames.reduce(
-    (result: Player[][], player, index) => {
-      const rowIndex = Math.floor(index / 2);
-      if (!result[rowIndex]) {
-        result[rowIndex] = [];
-      }
-      result[rowIndex].push(player);
-      return result;
-    },
-    []
-  );
-
   return (
-    <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.cloudButton}
-          onPress={handleSaveToFirestore}
-        >
-          <Text style={styles.buttonText}>Save to Cloud</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.cloudButton}
-          onPress={handleLoadFromFirestore}
-        >
-          <Text style={styles.buttonText}>Load from Cloud</Text>
-        </TouchableOpacity>
-      </View>
+    <View>
+      {/* Cloud Icon Button */}
+      <TouchableOpacity
+        style={styles.cloudIconButton}
+        onPress={() => setOptionsModalVisible(true)}
+      >
+        <Icon name="cloud" size={40} color="#2196F3" />
+      </TouchableOpacity>
 
-      <FlatList
-        data={groupedPlayers}
-        renderItem={renderRow}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.scrollView}
-      />
-      <PlayerEditModal
-        visible={modalVisible}
-        player={selectedPlayer}
-        onClose={closeModal}
-        onSave={saveChanges}
-        onDelete={handleDelete}
-      />
+      {/* Main Options Modal */}
+      <Modal
+        transparent={true}
+        visible={optionsModalVisible}
+        onRequestClose={() => setOptionsModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Cloud Sync</Text>
+            <View style={styles.optionsContainer}>
+              <TouchableOpacity
+                style={styles.cloudButton}
+                onPress={handleSaveToFirestore}
+              >
+                <Icon name="cloud-upload" size={24} color="white" />
+                <Text style={styles.buttonText}>Save to Cloud</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.cloudButton}
+                onPress={handleLoadFromFirestore}
+              >
+                <Icon name="cloud-download" size={24} color="white" />
+                <Text style={styles.buttonText}>Load from Cloud</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              style={[styles.cancelButton, { marginTop: 15 }]}
+              onPress={() => setOptionsModalVisible(false)}
+            >
+              <Text style={{ fontWeight: "bold" }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Web confirmation dialog */}
       {Platform.OS === "web" && (
@@ -279,33 +232,12 @@ const PlayerDisplay = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    width: "100%", // Ensure full width
+  cloudIconButton: {
+    alignSelf: "flex-end",
+    padding: 5,
   },
-  scrollView: {
-    padding: 0,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    width: "100%", // Ensure full width
-  },
-  column: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  playerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 5,
-  },
-  text: {
-    fontSize: 17,
-    lineHeight: 24,
-    paddingLeft: 0,
+  optionsContainer: {
+    gap: 10,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -314,11 +246,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   cloudButton: {
-    flex: 1,
+    flexDirection: "row",
     backgroundColor: "#2196F3",
-    padding: 10,
+    padding: 12,
     borderRadius: 5,
     alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
   },
   buttonText: {
     color: "white",
@@ -341,7 +275,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 15,
     textAlign: "center",
   },
   modalText: {
@@ -362,6 +296,9 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: "#f0f0f0",
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 5,
   },
   confirmButton: {
     backgroundColor: "#2196F3",
@@ -372,4 +309,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PlayerDisplay;
+export default CloudSync;

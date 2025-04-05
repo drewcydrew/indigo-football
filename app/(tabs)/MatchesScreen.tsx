@@ -1,11 +1,15 @@
+import React, { useState } from "react";
 import { StyleSheet } from "react-native";
-import { View } from "@/components/Themed";
-import PlayerDisplay from "@/components/displays/PlayerDisplay";
 
-export default function PlayerScreen() {
+import { View } from "@/components/Themed";
+import TeamSplitter from "@/components/displays/TeamSplitter"; // Import TeamSplitter
+
+export default function MatchesScreen() {
+  const [showScores, setShowScores] = useState(true); // State to toggle scores
+
   return (
     <View style={styles.container}>
-      <PlayerDisplay />
+      <TeamSplitter showScores={showScores} />
     </View>
   );
 }

@@ -8,8 +8,8 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { useNames, Team, Player } from "../context/NamesContext";
-import { useThemeColor } from "./Themed";
+import { useNames, Team, Player } from "../../context/NamesContext";
+import { useThemeColor } from "../Themed";
 import ColorPicker from "react-native-wheel-color-picker";
 import Modal from "react-native-modal";
 

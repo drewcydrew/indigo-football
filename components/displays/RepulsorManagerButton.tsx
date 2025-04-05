@@ -10,7 +10,7 @@ import {
   FlatList,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-import { useNames, Player, Repulsor } from "../context/NamesContext";
+import { useNames, Player, Repulsor } from "../../context/NamesContext";
 
 const RepulsorManagerButton: React.FC = () => {
   const { names, repulsors, addRepulsor, removeRepulsor } = useNames();
@@ -57,6 +57,14 @@ const RepulsorManagerButton: React.FC = () => {
 
   return (
     <View>
+      <Text
+        style={[
+          styles.switchLabel,
+          { color: colorScheme === "dark" ? "white" : "black" },
+        ]}
+      >
+        Repulsors
+      </Text>
       <TouchableOpacity
         style={styles.iconButton}
         onPress={() => setModalVisible(true)}
@@ -240,6 +248,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     marginTop: 5,
+  },
+  switchLabel: {
+    fontSize: 16,
   },
   playerSelector: {
     width: "48%",

@@ -8,9 +8,10 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from "react-native";
-import { Text } from "./Themed";
+import { Text } from "../Themed";
 import Slider from "@react-native-community/slider"; // Import Slider component
-import { Player } from "../context/NamesContext";
+import { Player } from "../../context/NamesContext";
+import { FontAwesome } from "@expo/vector-icons";
 
 interface PlayerEditModalProps {
   visible: boolean;
@@ -67,7 +68,7 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
             { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
           ]}
         >
-          <Text>Edit Player</Text>
+          <Text style={styles.modalTitle}>Edit Player</Text>
           <TextInput
             style={styles.input}
             value={editedName}
@@ -85,30 +86,41 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
             style={styles.slider}
           />
           <TextInput
-            style={[styles.input, styles.textArea]} // Add textArea style
+            style={[styles.input, styles.textArea]}
             value={editedBio}
             onChangeText={setEditedBio}
             placeholder="Bio"
-            multiline={true} // Enable multiline input
-            numberOfLines={4} // Set number of lines
+            multiline={true}
+            numberOfLines={4}
           />
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity onPress={handleSave} style={styles.button}>
+
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              onPress={handleSave}
+              style={[styles.button, styles.saveButton]}
+            >
+              <FontAwesome name="check" size={16} color="white" />
               <Text style={styles.buttonText}>Save</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onClose} style={styles.button}>
+
+            <TouchableOpacity
+              onPress={onClose}
+              style={[styles.button, styles.cancelButton]}
+            >
+              <FontAwesome name="times" size={16} color="white" />
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
-
-            {onDelete && player && (
-              <TouchableOpacity
-                onPress={handleDelete}
-                style={[styles.button, styles.deleteButton]}
-              >
-                <Text style={styles.buttonText}>Delete Player</Text>
-              </TouchableOpacity>
-            )}
           </View>
+
+          {onDelete && player && (
+            <TouchableOpacity
+              onPress={handleDelete}
+              style={[styles.button, styles.deleteButton]}
+            >
+              <FontAwesome name="trash" size={16} color="white" />
+              <Text style={styles.buttonText}>Delete Player</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -127,6 +139,16 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   input: {
     width: "100%",
@@ -134,35 +156,50 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: "#ccc",
+    borderRadius: 5,
   },
   textArea: {
-    height: 100, // Set height for text area
-    textAlignVertical: "top", // Align text to the top
+    height: 100,
+    textAlignVertical: "top",
   },
   slider: {
     width: "100%",
     marginVertical: 10,
   },
-  buttonContainer: {
+  buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+    marginTop: 10,
   },
   button: {
-    flex: 1,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     padding: 10,
-    marginHorizontal: 5,
-    backgroundColor: "#007bff",
     borderRadius: 5,
+    marginVertical: 5,
+  },
+  saveButton: {
+    backgroundColor: "#4CAF50",
+    flex: 1,
+    marginRight: 5,
+  },
+  cancelButton: {
+    backgroundColor: "#607D8B",
+    flex: 1,
+    marginLeft: 5,
   },
   deleteButton: {
-    backgroundColor: "#ff4d4d",
+    backgroundColor: "#F44336",
+    width: "100%",
     marginTop: 10,
   },
   buttonText: {
     color: "white",
     fontSize: 16,
+    fontWeight: "500",
+    marginLeft: 8,
   },
 });
 

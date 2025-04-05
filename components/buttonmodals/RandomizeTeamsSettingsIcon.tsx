@@ -18,10 +18,15 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
   const colorScheme = useColorScheme();
 
   // Get values and setters directly from context
-  const { showScores, setShowScores, numTeams, setNumTeams } = useNames();
+  const {
+    showScores,
+    setShowScores,
+    numTeams,
+    setNumTeams,
+    algorithm,
+    setAlgorithm,
+  } = useNames();
 
-  // Keep algorithm as local state since it's not in context
-  const [algorithm, setAlgorithm] = useState("scores");
   // Initialize local teams number from context
   const [localNumTeams, setLocalNumTeams] = useState(numTeams);
 

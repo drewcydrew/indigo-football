@@ -26,11 +26,6 @@ const SelectAllButton = () => {
       style={styles.container}
       activeOpacity={0.7}
     >
-      <Icon
-        name={allSelected ? "ios-close-circle" : "ios-checkmark-circle"}
-        size={22}
-        color="#007bff"
-      />
       <Text style={styles.buttonText}>
         {allSelected ? "Deselect All" : "Select All"}
       </Text>

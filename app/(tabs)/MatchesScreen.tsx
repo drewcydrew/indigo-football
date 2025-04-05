@@ -3,9 +3,10 @@ import { StyleSheet } from "react-native";
 
 import { View } from "@/components/Themed";
 import TeamSplitter from "@/components/displays/TeamSplitter"; // Import TeamSplitter
+import { useNames } from "../../context/NamesContext";
 
 export default function MatchesScreen() {
-  const [showScores, setShowScores] = useState(true); // State to toggle scores
+  const { showScores } = useNames(); // State to toggle scores
 
   return (
     <View style={styles.container}>

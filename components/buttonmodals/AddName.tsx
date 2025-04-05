@@ -5,23 +5,23 @@ import {
   View,
   Modal,
   TouchableOpacity,
-  Text,
   useColorScheme,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Text } from "../Themed";
+import { FontAwesome } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { useNames } from "@/context/NamesContext"; // Import useNames hook
+import { useNames } from "@/context/NamesContext";
 
 const AddName = () => {
   const [name, setName] = useState("");
   const [score, setScore] = useState(1);
   const [modalVisible, setModalVisible] = useState(false);
   const colorScheme = useColorScheme();
-  const { addName } = useNames(); // Get addName function directly from context
+  const { addName } = useNames();
 
   const handleAdd = () => {
     if (name.trim()) {
-      addName(name, score); // Use context function directly
+      addName(name, score);
       setName("");
       setScore(1);
       setModalVisible(false);
@@ -31,7 +31,7 @@ const AddName = () => {
   return (
     <View>
       <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Icon name="add-circle" size={40} color="#007bff" />
+        <FontAwesome name="plus-circle" size={40} color="#007bff" />
       </TouchableOpacity>
       <Modal
         animationType="slide"
@@ -46,6 +46,7 @@ const AddName = () => {
               { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
             ]}
           >
+            <Text style={styles.modalTitle}>Add New Player</Text>
             <TextInput
               style={styles.input}
               placeholder="Enter name"
@@ -61,14 +62,20 @@ const AddName = () => {
               value={score}
               onValueChange={setScore}
             />
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity onPress={handleAdd} style={styles.button}>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                onPress={handleAdd}
+                style={[styles.button, styles.saveButton]}
+              >
+                <FontAwesome name="check" size={16} color="white" />
                 <Text style={styles.buttonText}>Add</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 onPress={() => setModalVisible(false)}
-                style={styles.button}
+                style={[styles.button, styles.cancelButton]}
               >
+                <FontAwesome name="times" size={16} color="white" />
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -80,7 +87,6 @@ const AddName = () => {
 };
 
 const styles = StyleSheet.create({
-  // ...existing code...
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -92,6 +98,16 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   input: {
     width: "100%",
@@ -101,22 +117,35 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderRadius: 5,
   },
-  buttonContainer: {
+  buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+    marginTop: 10,
   },
   button: {
-    flex: 1,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     padding: 10,
-    marginHorizontal: 5,
-    backgroundColor: "#007bff",
     borderRadius: 5,
+    marginVertical: 5,
+  },
+  saveButton: {
+    backgroundColor: "#4CAF50",
+    flex: 1,
+    marginRight: 5,
+  },
+  cancelButton: {
+    backgroundColor: "#607D8B",
+    flex: 1,
+    marginLeft: 5,
   },
   buttonText: {
     color: "white",
     fontSize: 16,
+    fontWeight: "500",
+    marginLeft: 8,
   },
   slider: {
     width: "100%",

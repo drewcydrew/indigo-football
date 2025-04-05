@@ -196,8 +196,7 @@ export function getRandomTeamsByScores(
 
 const RandomizeTeamsRandomizeIcon: React.FC = () => {
   // Get everything we need directly from context
-  const { names, saveTeams, numTeams, repulsors } = useNames();
-  const [algorithm, setAlgorithm] = useState("scores");
+  const { names, saveTeams, numTeams, repulsors, algorithm } = useNames();
 
   const handleRandomize = () => {
     const allPlayers = [...names.flat()].filter((player) => player.included);

@@ -19,8 +19,6 @@ const NameList = () => {
     setAllSelected(!allSelected);
   };
 
-  console.log("Rendering name list:"); // Debugging line
-
   const renderName = (player: Player) => (
     <View style={styles.nameContainer}>
       <CheckBox

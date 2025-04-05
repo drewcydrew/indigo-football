@@ -21,6 +21,12 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState("#FFFFFF");
 
+  // Filter out any teams that contain excluded players (bench team)
+  const activeTeams = teams.filter(
+    (team) =>
+      team.players.length > 0 && team.players.every((player) => player.included)
+  );
+
   const openColorPicker = (teamId: number, currentColor: string) => {
     setSelectedTeamId(teamId);
     setSelectedColor(currentColor || "#FFFFFF");
@@ -105,7 +111,8 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
     </View>
   );
 
-  const groupedTeams = teams.reduce((result: Team[][], team, index) => {
+  // Use activeTeams instead of teams when grouping
+  const groupedTeams = activeTeams.reduce((result: Team[][], team, index) => {
     const rowIndex = Math.floor(index / 2);
     if (!result[rowIndex]) {
       result[rowIndex] = [];

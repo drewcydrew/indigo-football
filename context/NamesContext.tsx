@@ -25,6 +25,7 @@ interface StorageData {
   teamNames?: Record<number, string>;
   teamColors?: Record<number, string>;
   repulsors?: Repulsor[];
+  algorithm?: string; // Add algorithm to storage data
 }
 
 interface FirestorePlayer extends Player {
@@ -78,6 +79,8 @@ interface NamesContextType {
   deletePlayer: (player: Player) => void;
   saveToFirestore: () => Promise<void>;
   loadFromFirestore: () => Promise<void>;
+  algorithm: string; // Add algorithm state
+  setAlgorithm: (value: string) => void; // Add algorithm setter
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
@@ -91,6 +94,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [teamColors, setTeamColors] = useState<Record<number, string>>({});
   const [teamNames, setTeamNames] = useState<Record<number, string>>({}); // New state for team names
   const [repulsors, setRepulsors] = useState<Repulsor[]>([]);
+  const [algorithm, setAlgorithm] = useState("scores");
 
   useEffect(() => {
     if (isLoading) return;
@@ -123,6 +127,9 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         if (savedData.repulsors) {
           setRepulsors(savedData.repulsors);
         }
+        if (savedData.algorithm) {
+          setAlgorithm(savedData.algorithm); // Load algorithm
+        }
 
         setShowScores(savedData.showScores ?? true);
         setNumTeams(savedData.numTeams ?? 2);
@@ -146,6 +153,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
       teamNames,
       teamColors,
       repulsors,
+      algorithm,
     };
 
     saveToStorage(dataToSave);
@@ -157,6 +165,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     teamColors,
     repulsors,
     isLoading,
+    algorithm,
   ]);
 
   const addName = (name: string, score: number) => {
@@ -227,7 +236,19 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const saveTeams = (newTeams: Player[][]) => {
-    setNames(newTeams);
+    // Get all currently excluded players
+    const excludedPlayers = names.flat().filter((player) => !player.included);
+
+    // Create a copy of the new teams
+    const updatedTeams = [...newTeams];
+
+    // If there are excluded players, add them to a "bench" team
+    if (excludedPlayers.length > 0) {
+      // Create an "excluded" team at the end of the array
+      updatedTeams.push(excludedPlayers);
+    }
+
+    setNames(updatedTeams);
 
     // When new teams are created, preserve existing names and colors where possible
     // and create defaults for new teams
@@ -245,15 +266,12 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     ];
 
     // Update teams with preserved names and colors
-    const updatedTeamsArray = newTeams.map((players, index) => {
-      // Try to keep existing name and color, otherwise use defaults
-      return {
-        id: index,
-        players: players,
-        name: teamNames[index] || `Team ${index + 1}`,
-        color: teamColors[index] || defaultColors[index % defaultColors.length],
-      };
-    });
+    const updatedTeamsArray = updatedTeams.map((players, index) => ({
+      id: index,
+      players: players,
+      name: teamNames[index] || `Team ${index + 1}`,
+      color: teamColors[index] || defaultColors[index % defaultColors.length],
+    }));
 
     setTeams(updatedTeamsArray);
   };
@@ -420,6 +438,8 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         repulsors,
         addRepulsor,
         removeRepulsor,
+        algorithm, // Add algorithm to context
+        setAlgorithm, // Add algorithm setter to context
       }}
     >
       {children}

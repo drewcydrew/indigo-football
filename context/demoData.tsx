@@ -1,25 +1,4 @@
-export interface Player {
-  name: string;
-  score: number;
-  included: boolean;
-  bio: string;
-  matches: number;
-}
-
-export interface Repulsor {
-  player1: string;
-  player2: string;
-}
-
-interface StorageData {
-  names: Player[][];
-  showScores: boolean;
-  numTeams: number;
-  teamNames?: Record<number, string>;
-  teamColors?: Record<number, string>;
-  repulsors?: Repulsor[];
-  algorithm?: string; // Add algorithm to storage data
-}
+import { StorageData } from "./NamesContext";
 
 // Define demo data to use when no saved data exists
 export const DEMO_DATA: StorageData = {

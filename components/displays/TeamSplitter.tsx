@@ -77,7 +77,11 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
 
         {team.players.map((player: Player, playerIndex: number) => (
           <View key={playerIndex} style={styles.playerRow}>
-            <Text style={[styles.nameText, { color: textColor }]}>
+            <Text
+              style={[styles.nameText, { color: textColor }]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {player.name}
             </Text>
             {showScores && (
@@ -196,6 +200,8 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: 14,
     marginVertical: 3,
+    flex: 1,
+    flexShrink: 1,
   },
   nameInput: {
     fontSize: 14,

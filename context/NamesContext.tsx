@@ -22,7 +22,7 @@ export interface Player {
   matches: number;
 }
 
-interface StorageData {
+export interface StorageData {
   names: Player[][];
   showScores: boolean;
   numTeams: number;

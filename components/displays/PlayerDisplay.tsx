@@ -40,7 +40,12 @@ const PlayerDisplay = () => {
 
   const renderPlayer = (player: Player) => (
     <View style={styles.playerContainer}>
-      <Text style={styles.text} onPress={() => openModal(player)}>
+      <Text
+        style={styles.text}
+        onPress={() => openModal(player)}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
         {player.name}
       </Text>
     </View>
@@ -111,11 +116,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 5,
+    width: "100%", // Ensure container takes full width
   },
   text: {
     fontSize: 17,
     lineHeight: 24,
     paddingLeft: 0,
+    flex: 1, // Allow text to take available space
+    flexShrink: 1, // Allow text to shrink
   },
 });
 

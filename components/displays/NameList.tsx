@@ -33,6 +33,8 @@ const NameList = () => {
           styles.text,
           { color: colorScheme === "dark" ? "white" : "black" },
         ]}
+        numberOfLines={1}
+        ellipsizeMode="tail"
       >
         {player.name}
       </Text>
@@ -89,11 +91,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 2,
+    width: "100%",
   },
   text: {
     fontSize: 17,
     lineHeight: 24,
     paddingLeft: 5,
+    flex: 1, // Allow text to take available space
+    flexShrink: 1, // Allow text to shrink
   },
   selectButton: {
     padding: 10,

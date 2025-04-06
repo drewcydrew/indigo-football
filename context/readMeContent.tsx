@@ -9,7 +9,7 @@ export const introContent = {
       content:
         "Indigo Football is designed to help organize teams for Monday night football games.\n\n" +
         "Add players and assign them a score from 1 to 5.\n\n" +
-        "On game day, set attendance and the number of teams, then use the app to generate balanced teams.",
+        "On game day, set player attendance and choose the number of teams. Then use the app to generate balanced lineups.",
     },
   ],
 };
@@ -37,10 +37,17 @@ export const sections: Section[] = [
       {
         content:
           "Use this screen to manage your list of players. Tap an existing player to edit their name, score, or description.\n\n" +
-          "Tap the button in the top right to add new players and assign them a score from 1 to 5. This score is used when generating teams.\n\n" +
-          "Use the button in the top left to save or load players from the cloud.",
+          "Tap the button in the top-right corner to add a new player and assign a score from 1 to 5. This score is used when generating balanced teams.",
         video: require("../assets/democontent/PlayersVideo.mp4"),
         caption: "Players Screen",
+      },
+      {
+        video: require("../assets/democontent/LoadingVideo.mp4"),
+        content:
+          "Collections can be saved to the database and shared with other users. Optionally, you can add a password for protection.\n\n" +
+          "Be aware: loading a collection is a destructive action—it will overwrite your current data.\n\n" +
+          "Several example collections are available. To load one, enter the name exactly as shown: Celtic FC, Tottenham Hotspur, AC Milan, Real Madrid.",
+        caption: "Loading Player Collection",
       },
     ],
   },
@@ -49,7 +56,7 @@ export const sections: Section[] = [
     paragraphs: [
       {
         content:
-          "Once your player list is ready, use this screen on match night to select which players are available. Tap the top right button to select or deselect all players.",
+          "Once your player list is ready, use this screen on match night to select who is attending. Tap the button in the top-right corner to select or deselect all players.",
         video: require("../assets/democontent/AttendanceVideo.mp4"),
         caption: "Attendance Screen",
       },
@@ -60,35 +67,27 @@ export const sections: Section[] = [
     paragraphs: [
       {
         content:
-          "Use this screen to generate teams. Tap the generate button in the top right to re-roll the teams. Tap a jersey panel to change that team's jersey color.\n\n" +
-          "Use the settings icon in the top left to choose the number of teams and adjust additional team creation settings.",
+          "Use this screen to generate teams. Tap the generate button in the top-right corner to re-roll the teams. Tap a jersey panel to change that team’s jersey color.\n\n" +
+          "Use the settings icon in the top-left corner to choose the number of teams and customize team creation options.",
         video: require("../assets/democontent/MatchesVideo.mp4"),
         caption: "Matches Screen",
       },
-    ],
-  },
-  {
-    title: "Team Creation Settings",
-    paragraphs: [
-      {
-        image: require("../assets/democontent/MatchSettings.png"),
-        content:
-          "When creating teams, you can configure the number of teams, choose whether to display scores, and adjust the team creation algorithm and repulsor settings.",
-        caption: "Team creation settings panel",
-      },
       {
         subheading: "Creation Algorithm",
+        image: require("../assets/democontent/MatchSettings.png"),
+        caption: "Team creation settings panel",
         content:
-          "Sorting by score versus using random player assignment offers two different approaches to fairness. When sorting by score, the algorithm aims to build balanced teams by distributing players based on skill levels—higher-scoring players are spread across teams to keep total team scores even.\n\n" +
-          "Random assignment treats all players equally, shuffling them without considering score. This method can result in more unpredictable and potentially unbalanced teams. Use score-based sorting when competitive balance is important, or random assignment for spontaneity and fun.",
+          "You can choose between score-based sorting or random player assignment.\n\n" +
+          "Score-based sorting aims to create balanced teams by distributing higher-rated players evenly across all teams, resulting in more competitive matches.\n\n" +
+          "Random assignment treats all players equally and shuffles them without considering scores. This method is ideal for a more casual or unpredictable experience.",
       },
       {
         subheading: "Repulsors",
         video: require("../assets/democontent/RepulsorVideo.mp4"),
         caption: "Repulsor configuration panel",
         content:
-          "Repulsors act as constraints during team generation, preventing specific pairs of players from being placed on the same team. This can help separate rivals, avoid conflicts, or mix things up.\n\n" +
-          "When generating teams, the algorithm checks each team to ensure no repulsor pair is placed together. If a conflict is found, the configuration is rejected and retried—up to 50 times. After 50 failed attempts, the app uses a 'best effort' distribution that may not perfectly honor all repulsors but ensures teams are still created.",
+          "Repulsors prevent certain pairs of players from being placed on the same team—helpful for avoiding conflicts, shaking up familiar lineups, or managing rivalries.\n\n" +
+          "When generating teams, the app checks for repulsor violations. If any are found, it retries the configuration—up to 50 times. If all attempts fail, it applies a 'best effort' solution that may not respect every repulsor but ensures teams are still formed.",
       },
     ],
   },

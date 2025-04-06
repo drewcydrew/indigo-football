@@ -92,4 +92,19 @@ export const sections: Section[] = [
       },
     ],
   },
+  {
+    title: "Saving and Loading Collections",
+    paragraphs: [
+      {
+        video: require("../assets/democontent/LoadingVideo.mp4"),
+        content:
+          "Collections can be saved to the database and shared with other users. They can optionally be given a password. Be careful, as this is a destructive operation. Several example collections have been made available—enter the text exactly to load: Celtic FC, Tottenham Hotspur, AC Milan, Real Madrid.",
+        caption: "Loading Celtic FC",
+      },
+      {
+        content:
+          "Several example collections have been made available—enter the text exactly to load: Celtic FC, Tottenham Hotspur, AC Milan, Real Madrid.",
+      },
+    ],
+  },
 ];

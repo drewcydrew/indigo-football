@@ -189,16 +189,18 @@ export const DEMO_DATA: StorageData = {
     ],
   ],
   showScores: true,
-  numTeams: 3,
+  numTeams: 4,
   teamNames: {
-    0: "Spurs Defenders",
-    1: "Spurs Midfielders",
-    2: "Spurs Forwards",
+    0: "Team 1",
+    1: "Team 2",
+    2: "Team 3",
+    3: "Team 4",
   },
   teamColors: {
-    0: "#132257",
-    1: "#5A5A5A",
-    2: "#FFFFFF",
+    0: "#00A550", // Green
+    1: "#FF3131", // Red
+    2: "#FFCC00", // Yellow
+    3: "#FF8C00", // Orange
   },
   repulsors: [
     { player1: "Cristian Romero", player2: "Timo Werner" },

@@ -31,8 +31,8 @@ const NameList = () => {
       />
       <Text
         style={[
-          styles.text,
-          { color: colorScheme === "dark" ? "white" : "black" },
+          styles.text
+          
         ]}
         numberOfLines={1}
         ellipsizeMode="tail"

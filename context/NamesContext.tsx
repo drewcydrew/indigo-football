@@ -12,6 +12,8 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 
 import { sha256 } from "js-sha256";
 
+import { DEMO_DATA } from "./demoData"; // Import demo data
+
 export interface Player {
   name: string;
   score: number;
@@ -127,27 +129,52 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     const loadData = async () => {
       try {
         const savedData = (await loadFromStorage()) as StorageData;
-        if (savedData.names) {
-          setNames(savedData.names);
-        }
-        if (savedData.teamNames) {
-          setTeamNames(savedData.teamNames);
-        }
-        if (savedData.teamColors) {
-          setTeamColors(savedData.teamColors);
+
+        // Improved check for existing data
+        const hasData = Boolean(
+          savedData &&
+            savedData.names &&
+            savedData.names.length > 0 &&
+            savedData.names.some((team) => team.length > 0)
+        );
+
+        console.log("Has existing data:", hasData);
+        const dataToUse = hasData ? savedData : DEMO_DATA;
+
+        console.log("Using demo data:", !hasData);
+
+        if (dataToUse.names) {
+          setNames(dataToUse.names);
         }
 
-        if (savedData.repulsors) {
-          setRepulsors(savedData.repulsors);
-        }
-        if (savedData.algorithm) {
-          setAlgorithm(savedData.algorithm); // Load algorithm
+        if (dataToUse.teamNames) {
+          setTeamNames(dataToUse.teamNames);
         }
 
-        setShowScores(savedData.showScores ?? true);
-        setNumTeams(savedData.numTeams ?? 2);
+        if (dataToUse.teamColors) {
+          setTeamColors(dataToUse.teamColors);
+        }
+
+        if (dataToUse.repulsors) {
+          setRepulsors(dataToUse.repulsors);
+        }
+
+        if (dataToUse.algorithm) {
+          setAlgorithm(dataToUse.algorithm);
+        }
+
+        setShowScores(dataToUse.showScores ?? true);
+        setNumTeams(dataToUse.numTeams ?? 2);
       } catch (error) {
         console.warn("Error loading data:", error);
+        // If there's an error loading data, use demo data
+        setNames(DEMO_DATA.names);
+        setTeamNames(DEMO_DATA.teamNames || {});
+        setTeamColors(DEMO_DATA.teamColors || {});
+        setRepulsors(DEMO_DATA.repulsors || []);
+        setAlgorithm(DEMO_DATA.algorithm || "scores");
+        setShowScores(DEMO_DATA.showScores);
+        setNumTeams(DEMO_DATA.numTeams);
       } finally {
         setIsLoading(false);
       }

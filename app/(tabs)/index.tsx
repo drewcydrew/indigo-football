@@ -7,11 +7,38 @@ import {
   ScrollView,
   Platform,
   StatusBar,
+  Linking,
+  TouchableOpacity,
 } from "react-native";
 import { Text } from "../../components/Themed";
 import { useVideoPlayer, VideoView } from "expo-video";
+import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 
 import { introContent, sections, Paragraph } from "../../context/readMeContent";
+
+interface Link {
+  title: string;
+  url: string;
+  icon: React.ReactNode;
+}
+
+// Add links data
+const links: Link[] = [
+  {
+    title: "Install on Android",
+    url: "https://play.google.com/apps/internaltest/4701673097324534263",
+    icon: <FontAwesome name="android" size={20} color="white" />,
+  },
+  {
+    title: "Install on iOS",
+    url: "https://testflight.apple.com/join/Svk2p6ey",
+    icon: <Ionicons name="logo-apple" size={20} color="white" />,
+  },
+];
+
+const handleOpenLink = (url: string) => {
+  Linking.openURL(url).catch((err) => console.error("Couldn't open link", err));
+};
 
 const ReadMe = () => {
   const { width } = useWindowDimensions();
@@ -104,6 +131,28 @@ const ReadMe = () => {
               </Text>
             ))}
           </View>
+
+          {Platform.OS === "web" && (
+            <>
+              <View style={styles.linksBanner}>
+                {links.map((link, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.linkButton}
+                    onPress={() => handleOpenLink(link.url)}
+                  >
+                    <View style={styles.linkButtonContent}>
+                      {link.icon}
+                      <Text style={styles.linkButtonText}>{link.title}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Divider - only shown on web with the banner */}
+              <View style={styles.divider} />
+            </>
+          )}
 
           {/* Divider */}
           <View style={styles.divider} />
@@ -314,6 +363,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     //color: "#444",
+  },
+  linksBanner: {
+    flexDirection: "row",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    marginBottom: 24,
+    paddingHorizontal: 16,
+  },
+  linkButton: {
+    backgroundColor: "#4a90e2",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    margin: 8,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: "center",
+  },
+  linkButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  linkButtonText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
+    marginLeft: 8, // Add spacing between icon and text
   },
 });
 

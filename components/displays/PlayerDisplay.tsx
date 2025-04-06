@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { StyleSheet, View, FlatList, TouchableOpacity } from "react-native";
+import { StyleSheet, View, FlatList } from "react-native";
 import { Text } from "../Themed";
 import { useNames, Player } from "../../context/NamesContext";
 import PlayerEditModal from "./PlayerEditModal";
-import CloudSync from "../buttonmodals/CloudSync"; // Import the new component
 
 const PlayerDisplay = () => {
   const { names, updatePlayer, deletePlayer } = useNames();

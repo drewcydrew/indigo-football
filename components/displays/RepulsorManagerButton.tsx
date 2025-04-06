@@ -57,19 +57,16 @@ const RepulsorManagerButton: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text
-        style={[
-          styles.switchLabel,
-          { color: colorScheme === "dark" ? "white" : "black" },
-        ]}
-      >
-        Repulsors ({repulsors.length}):
-      </Text>
       <TouchableOpacity
         style={styles.iconButton}
         onPress={() => setModalVisible(true)}
       >
         <Icon name="people" size={40} color="#007bff" />
+        {repulsors.length > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{repulsors.length}</Text>
+          </View>
+        )}
       </TouchableOpacity>
 
       <Modal
@@ -334,6 +331,22 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     color: "white",
+    fontWeight: "bold",
+  },
+  badge: {
+    position: "absolute",
+    right: -5,
+    top: -5,
+    backgroundColor: "#ff3b30",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 12,
     fontWeight: "bold",
   },
 });

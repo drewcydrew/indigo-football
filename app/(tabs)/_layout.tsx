@@ -1,7 +1,7 @@
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, Tabs } from "expo-router";
-import { Pressable } from "react-native";
+import { Pressable, StatusBar } from "react-native";
 
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
@@ -30,6 +30,7 @@ export default function TabLayout() {
 
   return (
     <NamesProvider>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <Tabs>
         <Tabs.Screen
           name="index"

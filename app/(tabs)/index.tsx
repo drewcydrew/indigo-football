@@ -1,169 +1,166 @@
 import React from "react";
 import {
   View,
-  Text,
   StyleSheet,
   Image,
   useWindowDimensions,
   ScrollView,
   Platform,
+  StatusBar,
 } from "react-native";
+import { Text } from "../../components/Themed";
 import { useVideoPlayer, VideoView } from "expo-video";
 
-import { useRef } from "react";
-
-import { introContent, sections } from "../../context/readMeContent"; // Import the content from the context
-
-// Extract intro content into a separate variable
+import { introContent, sections, Paragraph } from "../../context/readMeContent";
 
 const ReadMe = () => {
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.contentWrapper}>
-        <View style={styles.logoContainer}>
+  // Helper component to render media (image or video)
+  const MediaComponent = ({
+    paragraph,
+    isWide,
+  }: {
+    paragraph: Paragraph;
+    isWide: boolean;
+  }) => {
+    if (paragraph.image) {
+      return (
+        <View style={styles.mediaWrapper}>
           <Image
-            source={require("../../assets/images/icon.png")}
-            style={styles.logo}
+            source={paragraph.image}
+            style={[
+              styles.media,
+              isWide ? styles.mediaWide : styles.mediaNarrow,
+            ]}
             resizeMode="contain"
+            borderRadius={8}
           />
+          {paragraph.caption && (
+            <Text style={styles.caption}>{paragraph.caption}</Text>
+          )}
         </View>
+      );
+    }
 
-        {/* Custom Intro Section */}
-        <View style={styles.introSection}>
-          <Text style={styles.introTitle}>{introContent.title}</Text>
-          {introContent.paragraphs.map((paragraph, i) => (
-            <Text key={i} style={styles.introText}>
-              {paragraph.content}
-            </Text>
-          ))}
+    if (paragraph.video) {
+      const player = useVideoPlayer(paragraph.video, (player) => {
+        player.loop = true;
+        player.muted = true;
+        player.play();
+      });
+
+      return (
+        <View style={styles.mediaWrapper}>
+          <View
+            style={[
+              styles.videoContainer,
+              isWide
+                ? styles.videoContainerWide
+                : styles.videoContainerPortrait,
+            ]}
+          >
+            <VideoView
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: 8,
+              }}
+              player={player}
+              contentFit="contain"
+            />
+          </View>
+          {paragraph.caption && (
+            <Text style={styles.caption}>{paragraph.caption}</Text>
+          )}
         </View>
+      );
+    }
 
-        {/* Divider */}
-        <View style={styles.divider} />
+    return null;
+  };
 
-        {sections.map((section, index) => {
-          const hasImage = !!section.image;
-          const isEven = index % 2 === 0;
-          const hasMedia = section.image || section.video;
+  return (
+    <View style={styles.container}>
+      <ScrollView style={styles.container}>
+        <View style={styles.contentWrapper}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/images/iconrounded.png")}
+              style={styles.logo}
+              resizeMode="contain"
+              height={80}
+              width={200}
+            />
+          </View>
 
-          const contentFirst = true; // ? isEven : true;
+          {/* Custom Intro Section */}
+          <View style={styles.introSection}>
+            <Text style={styles.introTitle}>{introContent.title}</Text>
+            {introContent.paragraphs.map((paragraph, i) => (
+              <Text key={i} style={styles.introText}>
+                {paragraph.content}
+              </Text>
+            ))}
+          </View>
 
-          const MediaComponent = () => {
-            if (section.image) {
-              return (
-                <View style={styles.mediaWrapper}>
-                  <Image
-                    source={section.image}
-                    style={[
-                      styles.media,
-                      isWide ? styles.mediaWide : styles.mediaNarrow,
-                    ]}
-                    resizeMode="contain"
-                  />
-                  {section.caption && (
-                    <Text style={styles.caption}>{section.caption}</Text>
-                  )}
-                </View>
-              );
-            }
+          {/* Divider */}
+          <View style={styles.divider} />
 
-            if (section.video) {
-              const player = useVideoPlayer(section.video, (player) => {
-                player.loop = true;
-                player.muted = true;
-                player.play();
-              });
+          {sections.map((section, sectionIndex) => (
+            <View key={sectionIndex} style={styles.sectionRow}>
+              <Text style={styles.title}>{section.title}</Text>
 
-              return (
-                <View style={styles.mediaWrapper}>
+              {section.paragraphs.map((paragraph, paragraphIndex) => {
+                const hasMedia = paragraph.image || paragraph.video;
+
+                return (
                   <View
+                    key={paragraphIndex}
                     style={[
-                      styles.videoContainer,
-                      isWide
-                        ? styles.videoContainerWide
-                        : styles.videoContainerPortrait,
+                      styles.paragraphContainer,
+                      isWide && hasMedia
+                        ? {
+                            flexDirection: "row",
+                            alignItems: "flex-start",
+                          }
+                        : undefined,
                     ]}
                   >
-                    <VideoView
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        backgroundColor: "#000",
-                        borderRadius: 8,
-                      }}
-                      player={player}
-                      allowsFullscreen
-                      allowsPictureInPicture
-                      contentFit="contain"
-                    />
+                    <View
+                      style={[
+                        styles.textContainer,
+                        isWide && hasMedia
+                          ? { flex: 1, marginRight: 16 }
+                          : undefined,
+                      ]}
+                    >
+                      {paragraph.subheading && (
+                        <Text style={styles.subheading}>
+                          {paragraph.subheading}
+                        </Text>
+                      )}
+                      <Text style={styles.paragraph}>{paragraph.content}</Text>
+                    </View>
+
+                    {hasMedia && (
+                      <MediaComponent paragraph={paragraph} isWide={isWide} />
+                    )}
                   </View>
-                  {section.caption && (
-                    <Text style={styles.caption}>{section.caption}</Text>
-                  )}
-                </View>
-              );
-            }
-
-            return null;
-          };
-
-          return (
-            <View
-              key={index}
-              style={[
-                styles.sectionRow,
-                {
-                  flexDirection: isWide && hasMedia ? "row" : "column",
-                  alignItems: isWide && hasMedia ? "flex-start" : "center",
-                },
-              ]}
-            >
-              {contentFirst && (
-                <View style={[styles.textContainer]}>
-                  <Text style={styles.title}>{section.title}</Text>
-                  {section.paragraphs.map((paragraph, i) => (
-                    <View key={i} style={styles.paragraphContainer}>
-                      {paragraph.subheading && (
-                        <Text style={styles.subheading}>
-                          {paragraph.subheading}
-                        </Text>
-                      )}
-                      <Text style={styles.paragraph}>{paragraph.content}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-
-              {!contentFirst && (
-                <View style={[styles.textContainer]}>
-                  <Text style={styles.title}>{section.title}</Text>
-                  {section.paragraphs.map((paragraph, i) => (
-                    <View key={i} style={styles.paragraphContainer}>
-                      {paragraph.subheading && (
-                        <Text style={styles.subheading}>
-                          {paragraph.subheading}
-                        </Text>
-                      )}
-                      <Text style={styles.paragraph}>{paragraph.content}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-              {hasMedia && <MediaComponent />}
+                );
+              })}
             </View>
-          );
-        })}
-      </View>
-    </ScrollView>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#ffffff",
+    //backgroundColor: "#ffffff",
     flex: 1,
   },
   contentWrapper: {
@@ -186,7 +183,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     marginBottom: 12,
-    color: "#333",
+    //color: "#333",
   },
   image: {
     borderRadius: 8,
@@ -198,11 +195,11 @@ const styles = StyleSheet.create({
   imageNarrow: {
     //width: 300,
     height: 600,
-    marginTop: 16,
+    //marginTop: 16,
   },
   video: {
     borderRadius: 8,
-    backgroundColor: "#000",
+    //backgroundColor: "#000",
   },
   videoWide: {
     width: 300,
@@ -224,14 +221,13 @@ const styles = StyleSheet.create({
   mediaNarrow: {
     width: 300,
     height: 500,
-    marginTop: 16,
-    alignSelf: "stretch",
+    alignSelf: "center",
     maxWidth: "100%", // Prevents overflow on small screens
   },
   videoContainer: {
     overflow: "hidden",
     borderRadius: 8,
-    backgroundColor: "#000",
+    //backgroundColor: "#000",
   },
   videoContainerWide: {
     width: 270, // Adjusted for portrait video in desktop view
@@ -262,7 +258,7 @@ const styles = StyleSheet.create({
   caption: {
     fontSize: 14,
     fontStyle: "italic",
-    color: "#666",
+    //color: "#666",
     textAlign: "center",
     marginTop: 8,
     marginBottom: 8,
@@ -273,10 +269,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 24,
     width: "100%",
+    borderRadius: 20,
   },
   logo: {
-    width: Platform.OS === "web" ? 300 : 200,
-    height: Platform.OS === "web" ? 120 : 80,
+    width: Platform.OS === "web" ? 300 : 500,
+    height: Platform.OS === "web" ? 120 : 300,
+    borderRadius: 20,
   },
   introSection: {
     marginBottom: 32,
@@ -287,13 +285,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 16,
-    color: "#333",
+    //color: "#333",
     textAlign: "center",
   },
   introText: {
     fontSize: 18,
     lineHeight: 28,
-    color: "#444",
+    //color: "#444",
     textAlign: "center",
     maxWidth: 800,
   },
@@ -310,12 +308,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 4,
-    color: "#444",
+    //color: "#444",
   },
   paragraph: {
     fontSize: 16,
     lineHeight: 24,
-    color: "#444",
+    //color: "#444",
   },
 });
 

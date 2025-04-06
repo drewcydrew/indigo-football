@@ -57,12 +57,10 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
         ]}
       >
         <View style={styles.teamHeader}>
-          <TextInput
-            style={[styles.teamTitleInput, { color: textColor }]}
-            value={team.name || `Team ${team.id + 1}`}
-            onChangeText={(newName) => updateTeamName(team.id, newName)}
-            placeholder={`Team ${team.id + 1}`}
-          />
+          <Text style={[styles.totalScoreText, { color: textColor }]}>
+            {team.name}
+          </Text>
+
           <TouchableOpacity
             onPress={() => openColorPicker(team.id, team.color || "#FFFFFF")}
             style={[styles.colorButton, { backgroundColor: teamColor }]}

@@ -6,6 +6,8 @@ import {
   Modal,
   TouchableOpacity,
   useColorScheme,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Text } from "../Themed";
 import { FontAwesome } from "@expo/vector-icons";
@@ -28,6 +30,10 @@ const AddName = () => {
     }
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
     <View>
       <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -39,48 +45,55 @@ const AddName = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View
-            style={[
-              styles.modalView,
-              { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
-            ]}
-          >
-            <Text style={styles.modalTitle}>Add New Player</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter name"
-              value={name}
-              onChangeText={setName}
-            />
-            <Text>Score: {score}</Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={1}
-              maximumValue={5}
-              step={1}
-              value={score}
-              onValueChange={setScore}
-            />
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                onPress={handleAdd}
-                style={[styles.button, styles.saveButton]}
-              >
-                <FontAwesome name="check" size={16} color="white" />
-                <Text style={styles.buttonText}>Add</Text>
-              </TouchableOpacity>
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+          <View style={styles.modalContainer}>
+            <View
+              style={[
+                styles.modalView,
+                { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
+              ]}
+            >
+              <Text style={styles.modalTitle}>Add New Player</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  { color: colorScheme === "dark" ? "white" : "black" },
+                  { borderColor: colorScheme === "dark" ? "#555" : "#ccc" },
+                ]}
+                placeholder="Enter name"
+                placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#999"}
+                value={name}
+                onChangeText={setName}
+              />
+              <Text>Score: {score}</Text>
+              <Slider
+                style={styles.slider}
+                minimumValue={1}
+                maximumValue={5}
+                step={1}
+                value={score}
+                onValueChange={setScore}
+              />
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  onPress={handleAdd}
+                  style={[styles.button, styles.saveButton]}
+                >
+                  <FontAwesome name="check" size={16} color="white" />
+                  <Text style={styles.buttonText}>Add</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={[styles.button, styles.cancelButton]}
-              >
-                <FontAwesome name="times" size={16} color="white" />
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={[styles.button, styles.cancelButton]}
+                >
+                  <FontAwesome name="times" size={16} color="white" />
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );

@@ -4,7 +4,6 @@ import {
   View,
   Modal,
   TouchableOpacity,
-  Text,
   useColorScheme,
   Switch,
 } from "react-native";
@@ -12,6 +11,7 @@ import Slider from "@react-native-community/slider";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNames } from "../../context/NamesContext";
 import RepulsorManagerButton from "../displays/RepulsorManagerButton";
+import { Text } from "../Themed"; // Using your themed Text component
 
 const RandomizeTeamsSettingsIcon: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -45,7 +45,7 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
       style={styles.iconButton}
       onPress={() => setModalVisible(true)}
     >
-      <Icon name="settings" size={40} color="#007bff" />
+      <Icon name="settings" size={28} color="#007bff" />
 
       <Modal
         animationType="slide"
@@ -60,7 +60,7 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
               { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
             ]}
           >
-            <Text style={styles.modalText}>Randomize Teams</Text>
+            <Text style={styles.modalText}>Settings</Text>
             <Text>Number of Teams: {localNumTeams}</Text>
             <Slider
               value={numTeams}
@@ -71,7 +71,37 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
               step={1}
               style={styles.slider}
             />
-            <View style={styles.repulsorContainer}>
+
+            <View style={styles.switchContainer}>
+              <Text
+                style={[
+                  styles.switchLabel,
+                  { color: colorScheme === "dark" ? "white" : "black" },
+                ]}
+              >
+                Algorithm
+              </Text>
+              <TouchableOpacity
+                onPress={() =>
+                  setAlgorithm(algorithm === "scores" ? "players" : "scores")
+                }
+                style={styles.algorithmToggle}
+              >
+                <Text style={styles.algorithmText}>
+                  {algorithm === "scores" ? "score" : "player"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.switchContainer}>
+              <Text
+                style={[
+                  styles.switchLabel,
+                  { color: colorScheme === "dark" ? "white" : "black" },
+                ]}
+              >
+                Repulsors
+              </Text>
               <RepulsorManagerButton />
             </View>
 
@@ -82,25 +112,14 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
                   { color: colorScheme === "dark" ? "white" : "black" },
                 ]}
               >
-                Sort by score?
-              </Text>
-              <Switch
-                value={algorithm === "scores"}
-                onValueChange={(val) =>
-                  setAlgorithm(val ? "scores" : "players")
-                }
-              />
-            </View>
-            <View style={styles.switchContainer}>
-              <Text
-                style={[
-                  styles.switchLabel,
-                  { color: colorScheme === "dark" ? "white" : "black" },
-                ]}
-              >
                 Show Scores
               </Text>
-              <Switch value={showScores} onValueChange={setShowScores} />
+              <Switch
+                value={showScores}
+                onValueChange={setShowScores}
+                trackColor={{ false: "#767577", true: "#007bff" }}
+                thumbColor={showScores ? "#f4f3f4" : "#f4f3f4"}
+              />
             </View>
 
             <View style={styles.buttonContainer}>
@@ -179,6 +198,18 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 16,
+  },
+  algorithmToggle: {
+    backgroundColor: "#007bff",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    minWidth: 70,
+    alignItems: "center",
+  },
+  algorithmText: {
+    color: "white",
+    fontWeight: "500",
   },
 });
 

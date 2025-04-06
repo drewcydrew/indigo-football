@@ -7,6 +7,10 @@ import {
   Button,
   TouchableOpacity,
   useColorScheme,
+  Keyboard,
+  TouchableWithoutFeedback,
+  InputAccessoryView,
+  Platform,
 } from "react-native";
 import { Text } from "../Themed";
 import Slider from "@react-native-community/slider"; // Import Slider component
@@ -54,6 +58,10 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
     }
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
     <Modal
       visible={visible}
@@ -61,68 +69,79 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.modalContainer}>
-        <View
-          style={[
-            styles.modalView,
-            { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
-          ]}
-        >
-          <Text style={styles.modalTitle}>Edit Player</Text>
-          <TextInput
-            style={styles.input}
-            value={editedName}
-            onChangeText={setEditedName}
-            placeholder="Name"
-          />
-          <Text>Score: {scorePreview}</Text>
-          <Slider
-            value={editedScore}
-            onValueChange={setScorePreview}
-            onSlidingComplete={setEditedScore}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            style={styles.slider}
-          />
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={editedBio}
-            onChangeText={setEditedBio}
-            placeholder="Bio"
-            multiline={true}
-            numberOfLines={4}
-          />
+      <TouchableWithoutFeedback onPress={dismissKeyboard}>
+        <View style={styles.modalContainer}>
+          <View
+            style={[
+              styles.modalView,
+              { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
+            ]}
+          >
+            <Text style={styles.modalTitle}>Edit Player</Text>
+            <TextInput
+              style={[
+                styles.input,
+                { color: colorScheme === "dark" ? "white" : "black" },
+              ]}
+              value={editedName}
+              onChangeText={setEditedName}
+              placeholder="Name"
+              placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#999"}
+            />
+            <Text>Score: {scorePreview}</Text>
+            <Slider
+              value={editedScore}
+              onValueChange={setScorePreview}
+              onSlidingComplete={setEditedScore}
+              minimumValue={1}
+              maximumValue={5}
+              step={1}
+              style={styles.slider}
+            />
+            <TextInput
+              style={[
+                styles.input,
+                styles.textArea,
+                { color: colorScheme === "dark" ? "white" : "black" },
+              ]}
+              value={editedBio}
+              onChangeText={setEditedBio}
+              placeholder="Bio"
+              placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#999"}
+              multiline={true}
+              numberOfLines={4}
+            />
 
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              onPress={handleSave}
-              style={[styles.button, styles.saveButton]}
-            >
-              <FontAwesome name="check" size={16} color="white" />
-              <Text style={styles.buttonText}>Save</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                onPress={handleSave}
+                style={[styles.button, styles.saveButton]}
+              >
+                <FontAwesome name="check" size={16} color="white" />
+                <Text style={styles.buttonText}>Save</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={onClose}
-              style={[styles.button, styles.cancelButton]}
-            >
-              <FontAwesome name="times" size={16} color="white" />
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={onClose}
+                style={[styles.button, styles.cancelButton]}
+              >
+                <FontAwesome name="times" size={16} color="white" />
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+
+            {onDelete && player && (
+              <TouchableOpacity
+                onPress={handleDelete}
+                style={[styles.button, styles.deleteButton]}
+              >
+                <FontAwesome name="trash" size={16} color="white" />
+                <Text style={styles.buttonText}>Delete Player</Text>
+              </TouchableOpacity>
+            )}
           </View>
-
-          {onDelete && player && (
-            <TouchableOpacity
-              onPress={handleDelete}
-              style={[styles.button, styles.deleteButton]}
-            >
-              <FontAwesome name="trash" size={16} color="white" />
-              <Text style={styles.buttonText}>Delete Player</Text>
-            </TouchableOpacity>
-          )}
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -200,6 +219,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     marginLeft: 8,
+  },
+  keyboardAccessory: {
+    width: "100%",
+    padding: 8,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
+  },
+  keyboardDoneButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  keyboardDoneText: {
+    color: "#007bff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 

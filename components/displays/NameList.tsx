@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, FlatList, StyleSheet, Text, useColorScheme } from "react-native";
+import { View, FlatList, StyleSheet, useColorScheme } from "react-native";
+import { Text } from "../Themed";
 import { CheckBox } from "react-native-elements";
 import { useNames } from "../../context/NamesContext";
 

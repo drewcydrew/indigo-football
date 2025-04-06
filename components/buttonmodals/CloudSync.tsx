@@ -7,15 +7,22 @@ import {
   Platform,
   Modal,
   useColorScheme,
+  TextInput,
 } from "react-native";
-import { Text } from "../Themed"; // Using your themed Text component
+import { Text } from "../Themed";
 import { useNames } from "../../context/NamesContext";
 import Icon from "react-native-vector-icons/Ionicons";
 import { FontAwesome } from "@expo/vector-icons";
 
 const CloudSync = () => {
-  const { saveToFirestore, loadFromFirestore } = useNames();
+  const {
+    saveToFirestore,
+    loadFromFirestore,
+    currentCollection,
+    setCurrentCollection,
+  } = useNames();
   const colorScheme = useColorScheme();
+  const [collectionName, setCollectionName] = useState(currentCollection);
 
   // Main modal visibility state
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
@@ -38,7 +45,7 @@ const CloudSync = () => {
     } else {
       Alert.alert(
         "Save to Cloud",
-        "Are you sure you want to save the current data to the cloud?",
+        `Are you sure you want to save the current data to collection "${collectionName}"?`,
         [
           {
             text: "Cancel",
@@ -48,8 +55,12 @@ const CloudSync = () => {
             text: "Save",
             onPress: async () => {
               try {
-                await saveToFirestore();
-                Alert.alert("Success", "Data saved to cloud successfully");
+                setCurrentCollection(collectionName);
+                await saveToFirestore(collectionName);
+                Alert.alert(
+                  "Success",
+                  `Data saved to "${collectionName}" collection successfully`
+                );
               } catch (error) {
                 Alert.alert("Error", "Failed to save data to cloud");
               }
@@ -69,7 +80,7 @@ const CloudSync = () => {
     } else {
       Alert.alert(
         "Load from Cloud",
-        "This will replace your current data with the cloud version. Are you sure?",
+        `This will replace your current data with the cloud version from collection "${collectionName}". Are you sure?`,
         [
           {
             text: "Cancel",
@@ -79,8 +90,12 @@ const CloudSync = () => {
             text: "Load",
             onPress: async () => {
               try {
-                await loadFromFirestore();
-                Alert.alert("Success", "Data loaded from cloud successfully");
+                setCurrentCollection(collectionName);
+                await loadFromFirestore(collectionName);
+                Alert.alert(
+                  "Success",
+                  `Data loaded from "${collectionName}" collection successfully`
+                );
               } catch (error) {
                 Alert.alert("Error", "Failed to load data from cloud");
               }
@@ -93,14 +108,20 @@ const CloudSync = () => {
 
   const handleWebAction = async () => {
     try {
+      setCurrentCollection(collectionName);
+
       if (confirmDialogAction === "load") {
-        await loadFromFirestore();
+        await loadFromFirestore(collectionName);
         setStatusDialogSuccess(true);
-        setStatusDialogMessage("Data loaded from cloud successfully");
+        setStatusDialogMessage(
+          `Data loaded from "${collectionName}" collection successfully`
+        );
       } else {
-        await saveToFirestore();
+        await saveToFirestore(collectionName);
         setStatusDialogSuccess(true);
-        setStatusDialogMessage("Data saved to cloud successfully");
+        setStatusDialogMessage(
+          `Data saved to "${collectionName}" collection successfully`
+        );
       }
     } catch (error) {
       setStatusDialogSuccess(false);
@@ -124,6 +145,7 @@ const CloudSync = () => {
       >
         <Icon name="cloud" size={28} color="#007bff" />
       </TouchableOpacity>
+
       {/* Main Options Modal */}
       <Modal
         transparent={true}
@@ -138,6 +160,25 @@ const CloudSync = () => {
             ]}
           >
             <Text style={styles.modalTitle}>Cloud Sync</Text>
+
+            {/* Collection Name Input */}
+            <View style={styles.collectionInputContainer}>
+              <Text style={styles.inputLabel}>Collection name:</Text>
+              <TextInput
+                style={[
+                  styles.collectionInput,
+                  {
+                    color: colorScheme === "dark" ? "white" : "black",
+                    borderColor: colorScheme === "dark" ? "#555" : "#ccc",
+                  },
+                ]}
+                value={collectionName}
+                onChangeText={setCollectionName}
+                placeholder="Enter collection name"
+                placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"}
+              />
+            </View>
+
             <View style={styles.optionsContainer}>
               <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
@@ -156,10 +197,7 @@ const CloudSync = () => {
               </TouchableOpacity>
             </View>
             <TouchableOpacity
-              style={[
-                styles.button,
-                styles.closeButton,
-              ]} /* Changed style name */
+              style={[styles.button, styles.closeButton]}
               onPress={() => setOptionsModalVisible(false)}
             >
               <FontAwesome name="times" size={16} color="white" />
@@ -168,6 +206,8 @@ const CloudSync = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Rest of the modal code remains the same */}
       {/* Web confirmation dialog */}
       {Platform.OS === "web" && (
         <Modal
@@ -189,8 +229,8 @@ const CloudSync = () => {
               </Text>
               <Text>
                 {confirmDialogAction === "load"
-                  ? "This will replace your current data with the cloud version. Are you sure?"
-                  : "Are you sure you want to save the current data to the cloud?"}
+                  ? `This will replace your current data with the cloud version from collection "${collectionName}". Are you sure?`
+                  : `Are you sure you want to save the current data to collection "${collectionName}"?`}
               </Text>
               <View style={styles.buttonRow}>
                 <TouchableOpacity
@@ -214,7 +254,8 @@ const CloudSync = () => {
           </View>
         </Modal>
       )}
-      {/* Web status dialog */}
+
+      {/* Web status dialog remains the same */}
       {Platform.OS === "web" && (
         <Modal
           transparent={true}
@@ -323,6 +364,21 @@ const styles = StyleSheet.create({
   closeButton: {
     backgroundColor: "#607D8B",
     marginTop: 5,
+  },
+  collectionInputContainer: {
+    width: "100%",
+    marginBottom: 15,
+  },
+  inputLabel: {
+    marginBottom: 5,
+    fontWeight: "500",
+  },
+  collectionInput: {
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 8,
+    width: "100%",
+    marginBottom: 10,
   },
 });
 

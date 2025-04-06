@@ -77,10 +77,12 @@ interface NamesContextType {
   numTeams: number;
   setNumTeams: (value: number) => void;
   deletePlayer: (player: Player) => void;
-  saveToFirestore: () => Promise<void>;
-  loadFromFirestore: () => Promise<void>;
+  saveToFirestore: (collectionName?: string) => Promise<void>;
+  loadFromFirestore: (collectionName?: string) => Promise<void>;
   algorithm: string; // Add algorithm state
   setAlgorithm: (value: string) => void; // Add algorithm setter
+  currentCollection: string; // Add current collection state
+  setCurrentCollection: (value: string) => void; // Add setter for current collection
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
@@ -95,6 +97,8 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [teamNames, setTeamNames] = useState<Record<number, string>>({}); // New state for team names
   const [repulsors, setRepulsors] = useState<Repulsor[]>([]);
   const [algorithm, setAlgorithm] = useState("scores");
+
+  const [currentCollection, setCurrentCollection] = useState<string>("teams");
 
   useEffect(() => {
     if (isLoading) return;
@@ -345,8 +349,10 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
-  const saveToFirestore = async () => {
+  const saveToFirestore = async (collectionName?: string) => {
     try {
+      const collection = collectionName || currentCollection;
+
       const processedNames = names
         .map((team, teamIndex) => {
           return team.map(
@@ -360,22 +366,24 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         })
         .flat();
 
-      await setDoc(doc(db, "teams", "current"), {
+      await setDoc(doc(db, collection, "current"), {
         players: processedNames,
-        teamNames, // Save team names
-        teamColors, // Save team colors
+        teamNames,
+        teamColors,
         showScores,
         numTeams,
         lastUpdated: new Date().toISOString(),
       });
     } catch (error) {
       console.error("Error saving to Firestore:", error);
+      throw error;
     }
   };
 
-  const loadFromFirestore = async () => {
+  const loadFromFirestore = async (collectionName?: string) => {
     try {
-      const docRef = doc(db, "teams", "current");
+      const collection = collectionName || currentCollection;
+      const docRef = doc(db, collection, "current");
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -440,6 +448,8 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         removeRepulsor,
         algorithm, // Add algorithm to context
         setAlgorithm, // Add algorithm setter to context
+        currentCollection,
+        setCurrentCollection,
       }}
     >
       {children}

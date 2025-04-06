@@ -203,8 +203,6 @@ export const DEMO_DATA: StorageData = {
     3: "#FF8C00", // Orange
   },
   repulsors: [
-    { player1: "Cristian Romero", player2: "Timo Werner" },
-    { player1: "Pierre-Emile Højbjerg", player2: "Giovani Lo Celso" },
   ],
   algorithm: "scores",
 };

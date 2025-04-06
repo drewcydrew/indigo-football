@@ -10,6 +10,8 @@ import { saveToStorage, loadFromStorage } from "../utils/crossPlatformStorage";
 import { db } from "../firebase/config";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
+import { sha256 } from "js-sha256";
+
 export interface Player {
   name: string;
   score: number;
@@ -77,8 +79,15 @@ interface NamesContextType {
   numTeams: number;
   setNumTeams: (value: number) => void;
   deletePlayer: (player: Player) => void;
-  saveToFirestore: (collectionName?: string) => Promise<void>;
-  loadFromFirestore: (collectionName?: string) => Promise<void>;
+  saveToFirestore: (
+    collectionName?: string,
+    password?: string | null
+  ) => Promise<void>;
+  loadFromFirestore: (
+    collectionName?: string,
+    password?: string | null,
+    checkPasswordOnly?: boolean
+  ) => Promise<any>;
   algorithm: string; // Add algorithm state
   setAlgorithm: (value: string) => void; // Add algorithm setter
   currentCollection: string; // Add current collection state
@@ -349,7 +358,10 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
-  const saveToFirestore = async (collectionName?: string) => {
+  const saveToFirestore = async (
+    collectionName?: string,
+    password?: string | null
+  ) => {
     try {
       const collection = collectionName || currentCollection;
 
@@ -366,55 +378,109 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         })
         .flat();
 
-      await setDoc(doc(db, collection, "current"), {
+      // Create the data object
+      const dataToSave = {
         players: processedNames,
         teamNames,
         teamColors,
         showScores,
         numTeams,
         lastUpdated: new Date().toISOString(),
+      };
+
+      // Save metadata separately to know if collection is password protected
+      await setDoc(doc(db, collection, "metadata"), {
+        hasPassword: !!password,
+        lastUpdated: new Date().toISOString(),
       });
+
+      // If password protected, save the password hash and use encryption
+      if (password) {
+        // Hash the password with SHA-256
+        const passwordHash = sha256(password);
+
+        // Save with password hash
+        await setDoc(doc(db, collection, "current"), {
+          ...dataToSave,
+          _passwordHash: passwordHash,
+        });
+      } else {
+        // Save without password protection
+        await setDoc(doc(db, collection, "current"), dataToSave);
+      }
     } catch (error) {
       console.error("Error saving to Firestore:", error);
       throw error;
     }
   };
 
-  const loadFromFirestore = async (collectionName?: string) => {
+  const loadFromFirestore = async (
+    collectionName?: string,
+    password?: string | null,
+    checkPasswordOnly: boolean = false
+  ) => {
     try {
       const collection = collectionName || currentCollection;
+
+      // First check if this collection exists and if it's password protected
       const docRef = doc(db, collection, "current");
       const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        const reconstructedNames: Player[][] = Array(numTeams)
-          .fill([])
-          .map(() => []);
-
-        (data.players as FirestorePlayer[]).forEach((player) => {
-          if (!reconstructedNames[player.teamIndex]) {
-            reconstructedNames[player.teamIndex] = [];
-          }
-          const { teamIndex, playerIndex, ...cleanPlayer } = player;
-          reconstructedNames[player.teamIndex].push(cleanPlayer);
-        });
-
-        setNames(reconstructedNames);
-
-        // Load team names and colors if available
-        if (data.teamNames) {
-          setTeamNames(data.teamNames);
-        }
-        if (data.teamColors) {
-          setTeamColors(data.teamColors);
-        }
-
-        setShowScores(data.showScores ?? true);
-        setNumTeams(data.numTeams ?? 2);
+      if (!docSnap.exists()) {
+        throw new Error(`No data found in collection: ${collection}`);
       }
+
+      const data = docSnap.data();
+      const isPasswordProtected = !!data._passwordHash;
+
+      // If we're just checking if password protection exists
+      if (checkPasswordOnly) {
+        return { isPasswordProtected };
+      }
+
+      // Check if password is required but not provided
+      if (isPasswordProtected && !password) {
+        throw new Error("Password required");
+      }
+
+      // Verify password if collection is protected
+      if (isPasswordProtected && password) {
+        const passwordHash = sha256(password);
+        if (passwordHash !== data._passwordHash) {
+          throw new Error("Incorrect password");
+        }
+      }
+
+      // Password is correct or not needed, reconstruct data
+      const reconstructedNames: Player[][] = Array(numTeams)
+        .fill([])
+        .map(() => []);
+
+      (data.players as FirestorePlayer[]).forEach((player) => {
+        if (!reconstructedNames[player.teamIndex]) {
+          reconstructedNames[player.teamIndex] = [];
+        }
+        const { teamIndex, playerIndex, ...cleanPlayer } = player;
+        reconstructedNames[player.teamIndex].push(cleanPlayer);
+      });
+
+      setNames(reconstructedNames);
+
+      // Load team names and colors if available
+      if (data.teamNames) {
+        setTeamNames(data.teamNames);
+      }
+      if (data.teamColors) {
+        setTeamColors(data.teamColors);
+      }
+
+      setShowScores(data.showScores ?? true);
+      setNumTeams(data.numTeams ?? 2);
+
+      return data;
     } catch (error) {
       console.error("Error loading from Firestore:", error);
+      throw error;
     }
   };
 

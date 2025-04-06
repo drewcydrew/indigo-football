@@ -145,9 +145,24 @@ const CloudSync = () => {
 
     try {
       // First check if this collection is password protected
-      const isProtected = await checkIfPasswordProtected(collectionName);
+      const checkResult = await checkIfPasswordProtected(collectionName);
 
-      if (isProtected) {
+      // If the collection doesn't exist, handle that specific case
+      if (checkResult.notFound) {
+        if (Platform.OS === "web") {
+          setStatusDialogSuccess(false);
+          setStatusDialogMessage(`Collection "${collectionName}" not found`);
+          setStatusDialogVisible(true);
+        } else {
+          Alert.alert(
+            "Collection Not Found",
+            `The collection "${collectionName}" could not be found.`
+          );
+        }
+        return;
+      }
+
+      if (checkResult.isPasswordProtected) {
         setIsPasswordRequired(true);
         if (Platform.OS === "web") {
           setPasswordDialogVisible(true);
@@ -196,22 +211,21 @@ const CloudSync = () => {
 
   const checkIfPasswordProtected = async (
     collectionName: string
-  ): Promise<boolean> => {
-    // This function should check if the collection has a password
-    // Implementation would depend on your Firestore structure
+  ): Promise<{ isPasswordProtected: boolean; notFound?: boolean }> => {
     try {
-      // Add code to check if collection has password protection
-      // For example:
-      // const docRef = doc(db, collectionName, "metadata");
-      // const docSnap = await getDoc(docRef);
-      // return docSnap.exists() && docSnap.data().hasPassword === true;
-
-      // For now returning a mock implementation
-      // Replace this with actual implementation
       const result = await loadFromFirestore(collectionName, null, true);
-      return result.isPasswordProtected || false;
+      return { isPasswordProtected: result.isPasswordProtected || false };
     } catch (error) {
       console.error("Error checking if password protected:", error);
+
+      // Check if the error is specifically about the collection not being found
+      if (
+        error instanceof Error &&
+        error.message.includes("No data found in collection")
+      ) {
+        return { isPasswordProtected: false, notFound: true };
+      }
+
       throw error;
     }
   };
@@ -302,7 +316,13 @@ const CloudSync = () => {
                 `Data loaded from "${collectionName}" collection successfully`
               );
             } catch (error) {
-              Alert.alert("Error", "Failed to load data from cloud");
+              const errorMessage =
+                error instanceof Error &&
+                error.message.includes("No data found in collection")
+                  ? `Collection "${collectionName}" not found`
+                  : "Failed to load data from cloud";
+
+              Alert.alert("Error", errorMessage);
             }
           },
         },

@@ -94,6 +94,7 @@ interface NamesContextType {
   setAlgorithm: (value: string) => void; // Add algorithm setter
   currentCollection: string; // Add current collection state
   setCurrentCollection: (value: string) => void; // Add setter for current collection
+  listCollections: () => Promise<{name: string; lastUpdated: string; hasPassword: boolean}[]>;
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
@@ -110,6 +111,10 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [algorithm, setAlgorithm] = useState("scores");
 
   const [currentCollection, setCurrentCollection] = useState<string>("teams");
+
+  
+  
+
 
   useEffect(() => {
     if (isLoading) return;
@@ -181,6 +186,26 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     };
     loadData();
   }, []);
+
+  const listCollections = async (): Promise<{name: string; lastUpdated: string; hasPassword: boolean}[]> => {
+      try {
+        // Get the collections registry
+        const registryDoc = await getDoc(doc(db, "_collections", "registry"));
+        
+        if (!registryDoc.exists()) {
+          return [];
+        }
+        
+        const collectionsData = registryDoc.data().collections || [];
+        return collectionsData.sort((a: any, b: any) => 
+          new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+        );
+      } catch (error) {
+        console.error("Error listing collections:", error);
+        return [];
+      }
+    };
+  
 
   // Save data when state changes
   useEffect(() => {
@@ -435,10 +460,41 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         // Save without password protection
         await setDoc(doc(db, collection, "current"), dataToSave);
       }
+
+      const registryRef = doc(db, "_collections", "registry");
+      const registryDoc = await getDoc(registryRef);
+      
+      const collectionEntry = {
+        name: collection,
+        hasPassword: !!password,
+        lastUpdated: new Date().toISOString()
+      };
+
+      if (registryDoc.exists()) {
+        const registryData = registryDoc.data();
+        const collections = registryData.collections || [];
+        
+        // Remove existing entry with same name if it exists
+        const filteredCollections = collections.filter((c: any) => c.name !== collection);
+        
+        // Add the updated entry
+        await setDoc(registryRef, {
+          collections: [...filteredCollections, collectionEntry]
+        });
+      } else {
+        // Create new registry with this collection
+        await setDoc(registryRef, {
+          collections: [collectionEntry]
+        });
+      }
+
+      
     } catch (error) {
       console.error("Error saving to Firestore:", error);
       throw error;
     }
+
+    
   };
 
   const loadFromFirestore = async (
@@ -543,6 +599,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         setAlgorithm, // Add algorithm setter to context
         currentCollection,
         setCurrentCollection,
+        listCollections, // Add listCollections to context
       }}
     >
       {children}

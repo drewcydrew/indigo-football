@@ -106,11 +106,12 @@ const CloudSync = () => {
   // Add this line to set the action type to "save" - this is what's missing!
   setConfirmDialogAction("save");
   
-  // Show collections list for selection
+  // Show collections list for selection WITH loading indicator
   setLoadingCollections(true);
+  setCollectionsModalVisible(true);
+  
   try {
     await fetchCollections();
-    setCollectionsModalVisible(true);
   } catch (error) {
     if (Platform.OS === "web") {
       setStatusDialogSuccess(false);
@@ -121,6 +122,7 @@ const CloudSync = () => {
     }
   }
 };
+
 
   // Existing collection selection handler - now handles both load and save
   const handleCollectionSelect = async (selectedCollectionTest: string) => {
@@ -235,26 +237,30 @@ const CloudSync = () => {
 
   // Modified load function to set action type before showing collections
   const handleLoadFromFirestore = async () => {
-    setOptionsModalVisible(false);
-    
-    // Set action type to load so handleCollectionSelect handles it correctly
-    setConfirmDialogAction("load");
-    
-    // Show collections modal
-    setLoadingCollections(true);
-    try {
-      await fetchCollections();
-      setCollectionsModalVisible(true);
-    } catch (error) {
-      if (Platform.OS === "web") {
-        setStatusDialogSuccess(false);
-        setStatusDialogMessage("Failed to fetch collections");
-        setStatusDialogVisible(true);
-      } else {
-        Alert.alert("Error", "Failed to fetch collections");
-      }
+  setOptionsModalVisible(false);
+  
+  // Set action type to load so handleCollectionSelect handles it correctly
+  setConfirmDialogAction("load");
+  
+  // Show collections modal FIRST with loading indicator
+  setLoadingCollections(true);
+  setCollectionsModalVisible(true);
+  
+  try {
+    // Then fetch collections
+    await fetchCollections();
+  } catch (error) {
+    if (Platform.OS === "web") {
+      setStatusDialogSuccess(false);
+      setStatusDialogMessage("Failed to fetch collections");
+      setStatusDialogVisible(true);
+    } else {
+      Alert.alert("Error", "Failed to fetch collections");
     }
-  };
+  }
+};
+
+
 
     
   // Format date for display

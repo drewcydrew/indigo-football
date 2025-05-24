@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -12,20 +12,38 @@ import { useNames, Team, Player } from "../../context/NamesContext";
 import { useThemeColor } from "../Themed";
 import ColorPicker from "react-native-wheel-color-picker";
 import Modal from "react-native-modal";
+import { useTeamGeneration } from "../../context/useGenerateTeams";
+import InfoDisplay from "../InfoDisplay";
+
+
 
 const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
-  const { teams, updateTeamName, updateTeamColor } = useNames();
+  const { teams, updateTeamName, updateTeamColor, names } = useNames();
   const textColor = useThemeColor({}, "text");
   const backgroundColor = useThemeColor({}, "background");
   const [colorPickerVisible, setColorPickerVisible] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState("#FFFFFF");
+  const { generateTeams } = useTeamGeneration();
+
+  // Track when we first mount the component
+  const [initialRender, setInitialRender] = useState(true);
+  const [lastGenerationKey, setLastGenerationKey] = useState("");
 
   // Filter out any teams that contain excluded players (bench team)
   const activeTeams = teams.filter(
     (team) =>
       team.players.length > 0 && team.players.every((player) => player.included)
   );
+
+  // Only auto-generate teams when the component first mounts
+  useEffect(() => {
+    if (initialRender) {
+      console.log("Initial team generation...");
+      generateTeams();
+      setInitialRender(false);
+    }
+  }, [initialRender, generateTeams]);
 
   const openColorPicker = (teamId: number, currentColor: string) => {
     setSelectedTeamId(teamId);
@@ -91,10 +109,12 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
             )}
           </View>
         ))}
+
+
       </View>
     );
   };
-
+        
   const renderRow = ({ item, index }: { item: Team[]; index: number }) => (
     <View style={styles.row}>
       {item.map((team, teamIndex) => (
@@ -160,6 +180,13 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
           </TouchableOpacity>
         </View>
       </Modal>
+
+      <InfoDisplay
+        title="Team generation"
+          content="Use the button in the top left to configure team generation settings (quantity, algorithm, repulsors), use button in top right to re-roll teams"
+        />
+
+
     </>
   );
 };

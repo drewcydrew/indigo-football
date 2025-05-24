@@ -3,6 +3,7 @@ import { StyleSheet, View, FlatList } from "react-native";
 import { Text } from "../Themed";
 import { useNames, Player } from "../../context/NamesContext";
 import PlayerEditModal from "./PlayerEditModal";
+import InfoDisplay from "../InfoDisplay";
 
 const PlayerDisplay = () => {
   const { names, updatePlayer, deletePlayer } = useNames();
@@ -89,6 +90,12 @@ const PlayerDisplay = () => {
         onSave={saveChanges}
         onDelete={handleDelete}
       />
+
+         <InfoDisplay
+        title="Players"
+          content="Use button in top left to load saved players from cloud (or to save current player details). Use button in top right to add players. Click player to edit details"
+        />
+
     </View>
   );
 };

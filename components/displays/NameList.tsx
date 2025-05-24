@@ -3,6 +3,7 @@ import { View, FlatList, StyleSheet, useColorScheme } from "react-native";
 import { Text } from "../Themed";
 import { CheckBox } from "react-native-elements";
 import { useNames } from "../../context/NamesContext";
+import InfoDisplay from "../InfoDisplay";
 
 interface Player {
   name: string;
@@ -69,6 +70,16 @@ const NameList = () => {
         keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.container}
       />
+
+   
+
+        <InfoDisplay
+                title="Attendance"
+                  content="use checkboxes to select players who are here at the moment (these are the players that will be used to generate teams on next page)"
+                />
+        
+
+
     </View>
   );
 };

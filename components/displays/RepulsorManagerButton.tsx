@@ -25,7 +25,7 @@ const RepulsorManagerButton: React.FC = () => {
   // Get all player names from all teams
   const allPlayers = names
     .flat()
-    .filter((player) => player.included)
+    //.filter((player) => player.included)
     .map((player) => player.name)
     .sort();
 

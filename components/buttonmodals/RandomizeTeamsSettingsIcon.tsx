@@ -7,15 +7,16 @@ import {
   useColorScheme,
   Switch,
 } from "react-native";
-import Slider from "@react-native-community/slider";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNames } from "../../context/NamesContext";
 import RepulsorManagerButton from "../displays/RepulsorManagerButton";
-import { Text } from "../Themed"; // Using your themed Text component
+import { Text } from "../Themed";
+import { useTeamGeneration } from "../../context/useGenerateTeams";
 
 const RandomizeTeamsSettingsIcon: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const colorScheme = useColorScheme();
+  const { generateTeams } = useTeamGeneration();
 
   // Get values and setters directly from context
   const {
@@ -29,6 +30,8 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
 
   // Initialize local teams number from context
   const [localNumTeams, setLocalNumTeams] = useState(numTeams);
+  // Track the last team number when we generated teams
+  const [lastGeneratedTeamNum, setLastGeneratedTeamNum] = useState(numTeams);
 
   // Keep local state in sync with context when numTeams changes externally
   useEffect(() => {
@@ -36,10 +39,30 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
   }, [numTeams]);
 
   const handleNumTeamsChange = (value: number) => {
+    // Update UI state immediately
     setLocalNumTeams(value);
     setNumTeams(value);
+    
+    // Auto-regenerate teams when number of teams changes
+    if (value !== lastGeneratedTeamNum) {
+      console.log(`Teams changed from ${lastGeneratedTeamNum} to ${value}, regenerating...`);
+      
+      // Call generateTeams with the new value directly
+      generateTeams(value); // We need to modify the hook to accept this parameter
+      setLastGeneratedTeamNum(value);
+    }
   };
 
+  // Also regenerate teams when algorithm changes
+  const handleAlgorithmChange = () => {
+    const newAlgorithm = algorithm === "scores" ? "players" : "scores";
+    setAlgorithm(newAlgorithm);
+    
+    // Pass the current team number explicitly
+    generateTeams(numTeams, newAlgorithm);
+  };
+
+  
   return (
     <TouchableOpacity
       style={styles.iconButton}
@@ -61,16 +84,33 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
             ]}
           >
             <Text style={styles.modalText}>Settings</Text>
-            <Text>Number of Teams: {localNumTeams}</Text>
-            <Slider
-              value={numTeams}
-              onValueChange={setLocalNumTeams}
-              onSlidingComplete={setNumTeams}
-              minimumValue={2}
-              maximumValue={6}
-              step={1}
-              style={styles.slider}
-            />
+            <Text style={styles.settingLabel}>Number of Teams:</Text>
+            
+            <View style={styles.teamsButtonsContainer}>
+              {[2, 3, 4, 5, 6].map((teamNum) => (
+                <TouchableOpacity
+                  key={teamNum}
+                  style={[
+                    styles.teamButton,
+                    numTeams === teamNum ? 
+                      styles.teamButtonActive : 
+                      { backgroundColor: colorScheme === "dark" ? "#555" : "#f0f0f0" },
+                    { borderColor: colorScheme === "dark" ? "#777" : "#ccc" }
+                  ]}
+                  onPress={() => handleNumTeamsChange(teamNum)}
+                >
+                  <Text style={[
+                    styles.teamButtonText,
+                    { color: colorScheme === "dark" ? 
+                      (numTeams === teamNum ? "white" : "#eee") : 
+                      (numTeams === teamNum ? "white" : "#333") 
+                    }
+                  ]}>
+                    {teamNum}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <View style={styles.switchContainer}>
               <Text
@@ -82,9 +122,7 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
                 Algorithm
               </Text>
               <TouchableOpacity
-                onPress={() =>
-                  setAlgorithm(algorithm === "scores" ? "players" : "scores")
-                }
+                onPress={handleAlgorithmChange}
                 style={styles.algorithmToggle}
               >
                 <Text style={styles.algorithmText}>
@@ -137,6 +175,7 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   iconButton: {
     padding: 8,
@@ -161,10 +200,32 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
   },
-  slider: {
-    width: "100%",
-    height: 40,
-    marginVertical: 10,
+  settingLabel: {
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+    fontSize: 16,
+  },
+  teamsButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 20,
+  },
+  teamButton: {
+    width: 45,
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+  teamButtonActive: {
+    backgroundColor: '#007BFF',
+    borderColor: '#0056b3',
+  },
+  teamButtonText: {
+    fontSize: 18,
+    fontWeight: '500',
   },
   switchContainer: {
     flexDirection: "row",

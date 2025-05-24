@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { Player } from '../context/NamesContext';
 
-const STORAGE_KEY = '@indigo_football_data';
+const STORAGE_KEY = '@indigo_football_stored_data';
 
 const isWeb = Platform.OS === 'web';
 

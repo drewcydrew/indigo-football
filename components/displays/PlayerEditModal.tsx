@@ -13,7 +13,6 @@ import {
   Platform,
 } from "react-native";
 import { Text } from "../Themed";
-import Slider from "@react-native-community/slider"; // Import Slider component
 import { Player } from "../../context/NamesContext";
 import { FontAwesome } from "@expo/vector-icons";
 
@@ -22,7 +21,7 @@ interface PlayerEditModalProps {
   player: Player | null;
   onClose: () => void;
   onSave: (name: string, score: number, bio: string) => void;
-  onDelete?: (player: Player) => void; // Add new prop
+  onDelete?: (player: Player) => void;
 }
 
 const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
@@ -34,9 +33,8 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
 }) => {
   const [editedName, setEditedName] = React.useState(player?.name || "");
   const [editedScore, setEditedScore] = React.useState(player?.score || 1);
-  const [scorePreview, setScorePreview] = React.useState(player?.score || 1);
   const [editedBio, setEditedBio] = React.useState(player?.bio || "");
-  const colorScheme = useColorScheme(); // Get the current color scheme
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
     if (player) {
@@ -47,7 +45,7 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
   }, [player]);
 
   const handleSave = () => {
-    onSave(editedName, editedScore, editedBio); // Remove matches from handleSave
+    onSave(editedName, editedScore, editedBio);
     onClose();
   };
 
@@ -88,16 +86,26 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
               placeholder="Name"
               placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#999"}
             />
-            <Text>Score: {scorePreview}</Text>
-            <Slider
-              value={editedScore}
-              onValueChange={setScorePreview}
-              onSlidingComplete={setEditedScore}
-              minimumValue={1}
-              maximumValue={5}
-              step={1}
-              style={styles.slider}
-            />
+            <Text style={styles.scoreLabel}>Score:</Text>
+            <View style={styles.scoreButtonsContainer}>
+              {[1, 2, 3, 4, 5].map((score) => (
+                <TouchableOpacity
+                  key={score}
+                  style={[
+                    styles.scoreButton,
+                    editedScore === score && styles.scoreButtonActive,
+                  ]}
+                  onPress={() => setEditedScore(score)}
+                >
+                  <Text style={[
+                    styles.scoreButtonText,
+                    editedScore === score && styles.scoreButtonTextActive
+                  ]}>
+                    {score}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <TextInput
               style={[
                 styles.input,
@@ -181,9 +189,38 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: "top",
   },
-  slider: {
-    width: "100%",
-    marginVertical: 10,
+  scoreLabel: {
+    alignSelf: 'flex-start',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  scoreButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 10,
+  },
+  scoreButton: {
+    width: 45,
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    backgroundColor: '#f0f0f0',
+  },
+  scoreButtonActive: {
+    backgroundColor: '#007BFF',
+    borderColor: '#0056b3',
+  },
+  scoreButtonText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: 'black',
+  },
+  scoreButtonTextActive: {
+    color: 'white',
   },
   buttonRow: {
     flexDirection: "row",

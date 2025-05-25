@@ -23,7 +23,7 @@ const CloudSync = () => {
     loadFromFirestore,
     currentCollection,
     setCurrentCollection,
-    listCollections
+    listCollections,
   } = useNames();
   const colorScheme = useColorScheme();
   const [collectionName, setCollectionName] = useState(currentCollection);
@@ -45,12 +45,10 @@ const CloudSync = () => {
   const [statusDialogSuccess, setStatusDialogSuccess] = useState(true);
 
   const [saveOptionsModalVisible, setSaveOptionsModalVisible] = useState(false);
-  const [saveCollectionModalVisible, setSaveCollectionModalVisible] = useState(false);
+  const [saveCollectionModalVisible, setSaveCollectionModalVisible] =
+    useState(false);
 
   const [testCollectionName, setTestCollectionName] = useState("");
-
-
-
 
   // Save password dialog state
   const [savePasswordPromptVisible, setSavePasswordPromptVisible] =
@@ -63,8 +61,10 @@ const CloudSync = () => {
   const [androidPasswordDialogVisible, setAndroidPasswordDialogVisible] =
     useState(false);
 
-    // New state for collections list
-  const [collections, setCollections] = useState<{name: string; lastUpdated: string; hasPassword: boolean}[]>([]);
+  // New state for collections list
+  const [collections, setCollections] = useState<
+    { name: string; lastUpdated: string; hasPassword: boolean }[]
+  >([]);
   const [collectionsModalVisible, setCollectionsModalVisible] = useState(false);
   const [loadingCollections, setLoadingCollections] = useState(false);
 
@@ -99,45 +99,44 @@ const CloudSync = () => {
     setSaveCollectionModalVisible(true); // Show name input modal
   };
 
-  // Handle "Update Existing" 
+  // Handle "Update Existing"
   const handleUpdateExisting = async () => {
-  setSaveOptionsModalVisible(false);
-  
-  // Add this line to set the action type to "save" - this is what's missing!
-  setConfirmDialogAction("save");
-  
-  // Show collections list for selection WITH loading indicator
-  setLoadingCollections(true);
-  setCollectionsModalVisible(true);
-  
-  try {
-    await fetchCollections();
-  } catch (error) {
-    if (Platform.OS === "web") {
-      setStatusDialogSuccess(false);
-      setStatusDialogMessage("Failed to fetch collections");
-      setStatusDialogVisible(true);
-    } else {
-      Alert.alert("Error", "Failed to fetch collections");
-    }
-  }
-};
+    setSaveOptionsModalVisible(false);
 
+    // Add this line to set the action type to "save" - this is what's missing!
+    setConfirmDialogAction("save");
+
+    // Show collections list for selection WITH loading indicator
+    setLoadingCollections(true);
+    setCollectionsModalVisible(true);
+
+    try {
+      await fetchCollections();
+    } catch (error) {
+      if (Platform.OS === "web") {
+        setStatusDialogSuccess(false);
+        setStatusDialogMessage("Failed to fetch collections");
+        setStatusDialogVisible(true);
+      } else {
+        Alert.alert("Error", "Failed to fetch collections");
+      }
+    }
+  };
 
   // Existing collection selection handler - now handles both load and save
-  const handleCollectionSelect = async (selectedCollectionTest: string) => {
+  // Existing collection selection handler - now handles both load and save
+  const handleCollectionSelect = async (selectedCollection: string) => {
+    console.log("Provided string is:", selectedCollection);
 
-    console.log("Provided string is:", selectedCollectionTest);
-    
-    
     setCollectionsModalVisible(false);
-    setTestCollectionName(selectedCollectionTest);
+    setTestCollectionName(selectedCollection);
 
-    setCollectionName(selectedCollectionTest);
-    setCurrentCollection(selectedCollectionTest);
+    // Update the collection name immediately
+    setCollectionName(selectedCollection);
+    setCurrentCollection(selectedCollection);
 
     console.log("Selected collection:", testCollectionName);
-    
+
     // If we're coming from the update existing flow, go to password prompt
     if (confirmDialogAction === "save") {
       // For updating, proceed to password prompt if on web, or alert on mobile
@@ -186,22 +185,24 @@ const CloudSync = () => {
       }
       return;
     }
-    
+
     // Otherwise, this is from the load flow, continue with existing logic
     try {
       // Check if collection is password protected
-      const checkResult = await checkIfPasswordProtected(selectedCollectionTest);
+      const checkResult = await checkIfPasswordProtected(selectedCollection);
 
       // Handle not found case
       if (checkResult.notFound) {
         if (Platform.OS === "web") {
           setStatusDialogSuccess(false);
-          setStatusDialogMessage(`Collection "${selectedCollectionTest}" not found`);
+          setStatusDialogMessage(
+            `Collection "${selectedCollection}" not found`
+          );
           setStatusDialogVisible(true);
         } else {
           Alert.alert(
             "Collection Not Found",
-            `The collection "${selectedCollectionTest}" could not be found.`
+            `The collection "${selectedCollection}" could not be found.`
           );
         }
         return;
@@ -210,9 +211,15 @@ const CloudSync = () => {
       if (checkResult.isPasswordProtected) {
         setIsPasswordRequired(true);
         if (Platform.OS === "web") {
-          setPasswordDialogVisible(true);
+          // Delay showing the password dialog slightly to ensure collectionName is updated
+          setTimeout(() => {
+            setPasswordDialogVisible(true);
+          }, 100);
         } else {
-          promptForPassword();
+          // Delay showing the password prompt slightly to ensure collectionName is updated
+          setTimeout(() => {
+            promptForPassword();
+          }, 100);
         }
         return;
       }
@@ -222,7 +229,7 @@ const CloudSync = () => {
         setConfirmDialogAction("load");
         setConfirmDialogVisible(true);
       } else {
-        confirmLoad(selectedCollectionTest);
+        confirmLoad(selectedCollection);
       }
     } catch (error) {
       if (Platform.OS === "web") {
@@ -237,32 +244,29 @@ const CloudSync = () => {
 
   // Modified load function to set action type before showing collections
   const handleLoadFromFirestore = async () => {
-  setOptionsModalVisible(false);
-  
-  // Set action type to load so handleCollectionSelect handles it correctly
-  setConfirmDialogAction("load");
-  
-  // Show collections modal FIRST with loading indicator
-  setLoadingCollections(true);
-  setCollectionsModalVisible(true);
-  
-  try {
-    // Then fetch collections
-    await fetchCollections();
-  } catch (error) {
-    if (Platform.OS === "web") {
-      setStatusDialogSuccess(false);
-      setStatusDialogMessage("Failed to fetch collections");
-      setStatusDialogVisible(true);
-    } else {
-      Alert.alert("Error", "Failed to fetch collections");
+    setOptionsModalVisible(false);
+
+    // Set action type to load so handleCollectionSelect handles it correctly
+    setConfirmDialogAction("load");
+
+    // Show collections modal FIRST with loading indicator
+    setLoadingCollections(true);
+    setCollectionsModalVisible(true);
+
+    try {
+      // Then fetch collections
+      await fetchCollections();
+    } catch (error) {
+      if (Platform.OS === "web") {
+        setStatusDialogSuccess(false);
+        setStatusDialogMessage("Failed to fetch collections");
+        setStatusDialogVisible(true);
+      } else {
+        Alert.alert("Error", "Failed to fetch collections");
+      }
     }
-  }
-};
+  };
 
-
-
-    
   // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -270,60 +274,53 @@ const CloudSync = () => {
   };
 
   const handleSaveAsNewContinue = () => {
-  setSaveCollectionModalVisible(false);
-  
-  // Proceed to password protection prompt
-  if (Platform.OS === "web") {
-    // For Web, show the password prompt
-    setSavePasswordPromptVisible(true);
-  } else {
-    // For mobile, use Alert to ask about password protection
-    Alert.alert(
-      "Password Protection",
-      "Do you want to password protect this collection?",
-      [
-        {
-          text: "No",
-          onPress: () => confirmSave(""),
-        },
-        {
-          text: "Yes",
-          onPress: () => {
-            if (Platform.OS === "ios") {
-              Alert.prompt(
-                "Set Password",
-                "Enter a password to protect your collection:",
-                [
-                  {
-                    text: "Cancel",
-                    style: "cancel",
-                    onPress: () => confirmSave(""),
-                  },
-                  {
-                    text: "Set",
-                    onPress: (password) => confirmSave(password || ""),
-                  },
-                ],
-                "secure-text"
-              );
-            } else {
-              // For Android, show our custom password input dialog
-              setPassword("");
-              setSavePasswordDialogVisible(true);
-            }
+    setSaveCollectionModalVisible(false);
+
+    // Proceed to password protection prompt
+    if (Platform.OS === "web") {
+      // For Web, show the password prompt
+      setSavePasswordPromptVisible(true);
+    } else {
+      // For mobile, use Alert to ask about password protection
+      Alert.alert(
+        "Password Protection",
+        "Do you want to password protect this collection?",
+        [
+          {
+            text: "No",
+            onPress: () => confirmSave(""),
           },
-        },
-      ]
-    );
-  }
-};
-  
-
-
-    
-    
-
-  
+          {
+            text: "Yes",
+            onPress: () => {
+              if (Platform.OS === "ios") {
+                Alert.prompt(
+                  "Set Password",
+                  "Enter a password to protect your collection:",
+                  [
+                    {
+                      text: "Cancel",
+                      style: "cancel",
+                      onPress: () => confirmSave(""),
+                    },
+                    {
+                      text: "Set",
+                      onPress: (password) => confirmSave(password || ""),
+                    },
+                  ],
+                  "secure-text"
+                );
+              } else {
+                // For Android, show our custom password input dialog
+                setPassword("");
+                setSavePasswordDialogVisible(true);
+              }
+            },
+          },
+        ]
+      );
+    }
+  };
 
   const confirmSave = (pwd: string) => {
     if (Platform.OS === "web") {
@@ -364,8 +361,6 @@ const CloudSync = () => {
       );
     }
   };
-
-  
 
   const handleAndroidPasswordSubmit = () => {
     setSavePasswordDialogVisible(false);
@@ -424,7 +419,8 @@ const CloudSync = () => {
               if (!password) return;
 
               try {
-                await loadWithPassword(password);
+                // await loadWithPassword(password);
+                confirmLoad(collectionName, true);
               } catch (error) {
                 Alert.alert(
                   "Error",
@@ -473,7 +469,7 @@ const CloudSync = () => {
     }
   };
 
-  const confirmLoad = (collectionName: string) => {
+  const confirmLoad = (collectionName: string, isPasswordProtected = false) => {
     console.log("Confirming load from collection:", collectionName);
     Alert.alert(
       "Load from Cloud",
@@ -488,7 +484,7 @@ const CloudSync = () => {
           onPress: async () => {
             try {
               setCurrentCollection(collectionName);
-              await loadFromFirestore(collectionName);
+              await loadFromFirestore(collectionName, password); // Pass password here
               Alert.alert(
                 "Success",
                 `Data loaded from "${collectionName}" collection successfully`
@@ -550,7 +546,8 @@ const CloudSync = () => {
 
   const handlePasswordSubmit = async () => {
     try {
-      await loadWithPassword(password);
+      // await loadWithPassword(password);
+      confirmLoad(collectionName, true);
       setPasswordDialogVisible(false);
     } catch (error) {
       // Error handling is inside loadWithPassword
@@ -598,7 +595,7 @@ const CloudSync = () => {
                 <Text style={styles.buttonText}>Load from Cloud</Text>
               </TouchableOpacity>
             </View>
-            
+
             <TouchableOpacity
               style={[styles.button, styles.closeButton]}
               onPress={() => setOptionsModalVisible(false)}
@@ -624,7 +621,7 @@ const CloudSync = () => {
             ]}
           >
             <Text style={styles.modalTitle}>Save Options</Text>
-            
+
             <View style={styles.optionsContainer}>
               <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
@@ -642,7 +639,7 @@ const CloudSync = () => {
                 <Text style={styles.buttonText}>Update Existing</Text>
               </TouchableOpacity>
             </View>
-            
+
             <TouchableOpacity
               style={[styles.button, styles.closeButton]}
               onPress={() => setSaveOptionsModalVisible(false)}
@@ -668,7 +665,7 @@ const CloudSync = () => {
             ]}
           >
             <Text style={styles.modalTitle}>Save Collection</Text>
-            
+
             <View style={styles.collectionInputContainer}>
               <Text style={styles.inputLabel}>Collection name:</Text>
               <TextInput
@@ -686,7 +683,7 @@ const CloudSync = () => {
                 autoFocus={true}
               />
             </View>
-            
+
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.button, styles.cancelButton]}
@@ -695,7 +692,7 @@ const CloudSync = () => {
                 <FontAwesome name="arrow-left" size={16} color="white" />
                 <Text style={styles.buttonText}>Back</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[styles.button, styles.confirmButton]}
                 onPress={handleSaveAsNewContinue}
@@ -707,7 +704,6 @@ const CloudSync = () => {
           </View>
         </View>
       </Modal>
-
 
       {/* Web confirmation dialog */}
       {Platform.OS === "web" && (
@@ -1069,10 +1065,9 @@ const CloudSync = () => {
             </View>
           </View>
         </Modal>
-        
       )}
 
-     {/* Collection Selection Modal - Update to handle both loading and saving */}
+      {/* Collection Selection Modal - Update to handle both loading and saving */}
       <Modal
         transparent={true}
         visible={collectionsModalVisible}
@@ -1082,48 +1077,63 @@ const CloudSync = () => {
           <View
             style={[
               styles.modalView,
-              { 
+              {
                 backgroundColor: colorScheme === "dark" ? "#333" : "#fff",
                 width: 350,
-                maxHeight: "80%"
+                maxHeight: "80%",
               },
             ]}
           >
             <Text style={styles.modalTitle}>
-              {confirmDialogAction === "load" 
-                ? "Available Collections" 
+              {confirmDialogAction === "load"
+                ? "Available Collections"
                 : "Select Collection to Update"}
             </Text>
-            
+
             {loadingCollections ? (
-              <ActivityIndicator size="large" color="#007bff" style={{margin: 20}} />
+              <ActivityIndicator
+                size="large"
+                color="#007bff"
+                style={{ margin: 20 }}
+              />
             ) : collections.length === 0 ? (
-              <Text style={{textAlign: 'center', margin: 20}}>No collections found</Text>
+              <Text style={{ textAlign: "center", margin: 20 }}>
+                No collections found
+              </Text>
             ) : (
               <FlatList
                 data={collections}
-                style={{width: '100%', maxHeight: 300}}
-                keyExtractor={item => item.name}
-                renderItem={({item}) => (
+                style={{ width: "100%", maxHeight: 300 }}
+                keyExtractor={(item) => item.name}
+                renderItem={({ item }) => (
                   <TouchableOpacity
                     style={[
                       styles.collectionItem,
-                      {borderColor: colorScheme === "dark" ? "#555" : "#ddd"}
+                      { borderColor: colorScheme === "dark" ? "#555" : "#ddd" },
                     ]}
                     onPress={() => {
                       handleCollectionSelect(item.name);
                     }}
                   >
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <Icon 
-                        name="document" 
-                        size={20} 
-                        color={colorScheme === "dark" ? "#aaa" : "#666"} 
-                        style={{marginRight: 10}}
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Icon
+                        name="document"
+                        size={20}
+                        color={colorScheme === "dark" ? "#aaa" : "#666"}
+                        style={{ marginRight: 10 }}
                       />
                       <View>
-                        <Text style={{fontWeight: 'bold', fontSize: 16}}>{item.name}</Text>
-                        <Text style={{fontSize: 12, color: colorScheme === "dark" ? "#aaa" : "#666"}}>
+                        <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+                          {item.name}
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: colorScheme === "dark" ? "#aaa" : "#666",
+                          }}
+                        >
                           {formatDate(item.lastUpdated)}
                         </Text>
                       </View>
@@ -1135,9 +1145,13 @@ const CloudSync = () => {
                 )}
               />
             )}
-            
+
             <TouchableOpacity
-              style={[styles.button, styles.closeButton, {width: "100%", marginTop: 15}]}
+              style={[
+                styles.button,
+                styles.closeButton,
+                { width: "100%", marginTop: 15 },
+              ]}
               onPress={() => setCollectionsModalVisible(false)}
             >
               <FontAwesome name="arrow-left" size={16} color="white" />
@@ -1146,8 +1160,6 @@ const CloudSync = () => {
           </View>
         </View>
       </Modal>
-
-      
     </View>
   );
 };
@@ -1195,12 +1207,12 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   collectionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 12,
     borderBottomWidth: 1,
-    width: '100%'
+    width: "100%",
   },
   button: {
     flexDirection: "row",

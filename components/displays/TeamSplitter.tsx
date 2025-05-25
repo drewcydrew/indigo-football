@@ -15,8 +15,6 @@ import Modal from "react-native-modal";
 import { useTeamGeneration } from "../../context/useGenerateTeams";
 import InfoDisplay from "../InfoDisplay";
 
-
-
 const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
   const { teams, updateTeamName, updateTeamColor, names } = useNames();
   const textColor = useThemeColor({}, "text");
@@ -109,12 +107,10 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
             )}
           </View>
         ))}
-
-
       </View>
     );
   };
-        
+
   const renderRow = ({ item, index }: { item: Team[]; index: number }) => (
     <View style={styles.row}>
       {item.map((team, teamIndex) => (
@@ -183,10 +179,8 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
 
       <InfoDisplay
         title="Team generation"
-          content="Use the button in the top left to configure team generation settings (quantity, algorithm, repulsors), use button in top right to re-roll teams"
-        />
-
-
+        content="Use settings button in the top left to configure team generation settings (number of teams, sorting algorithm, player repulsors), use randomise button in top right to generate new teams from current settings"
+      />
     </>
   );
 };

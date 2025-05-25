@@ -14,7 +14,7 @@ const NameList = () => {
   const { names, togglePlayerIncluded, setAllIncluded } = useNames();
   const flatNames: Player[] = names.flat();
   const [allSelected, setAllSelected] = useState(false);
-  const colorScheme = useColorScheme(); // Get the current color scheme
+  const colorScheme = useColorScheme();
 
   const handleSelectAll = () => {
     setAllIncluded(!allSelected);
@@ -26,18 +26,9 @@ const NameList = () => {
       <CheckBox
         checked={player.included}
         onPress={() => togglePlayerIncluded(player.name)}
-        //checkedIcon="dot-circle-o"
-        //uncheckedIcon="circle-o"
         textStyle={{ color: colorScheme === "dark" ? "white" : "black" }}
       />
-      <Text
-        style={[
-          styles.text
-          
-        ]}
-        numberOfLines={1}
-        ellipsizeMode="tail"
-      >
+      <Text style={[styles.text]} numberOfLines={1} ellipsizeMode="tail">
         {player.name}
       </Text>
     </View>
@@ -63,7 +54,7 @@ const NameList = () => {
   }, []);
 
   return (
-    <View>
+    <View style={styles.mainContainer}>
       <FlatList
         data={groupedNames}
         renderItem={renderRow}
@@ -71,29 +62,30 @@ const NameList = () => {
         contentContainerStyle={styles.container}
       />
 
-   
-
-        <InfoDisplay
-                title="Attendance"
-                  content="use checkboxes to select players who are here at the moment (these are the players that will be used to generate teams on next page)"
-                />
-        
-
-
+      <InfoDisplay
+        title="Attendance"
+        content="Use checkboxes to select players who are here at the moment (these are the players that will be used to generate teams on next page)"
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    position: "relative",
+    width: "100%",
+    height: "100%",
+  },
   container: {
     padding: 5,
-    width: "100%", // Ensure full width
+    width: "100%",
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 5,
-    width: "100%", // Ensure full width
+    width: "100%",
   },
   column: {
     flex: 1,
@@ -109,8 +101,8 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 24,
     paddingLeft: 5,
-    flex: 1, // Allow text to take available space
-    flexShrink: 1, // Allow text to shrink
+    flex: 1,
+    flexShrink: 1,
   },
   selectButton: {
     padding: 10,

@@ -46,7 +46,7 @@ export const sections: Section[] = [
         content:
           "Tap the cloud button in the top left to back up your player collection, or to load an online collection.\n\n" +
           "Be aware: loading a collection is a destructive action—it will overwrite your current data.\n\n" +
-          "Several example collections are available: Celtic FC, Tottenham Hotspur, AC Milan, Real Madrid.",
+          "Several example collections are available: Celtic FC, Tottenham Hotspurs, AC Milan, Real Madrid.",
         caption: "Loading Player Collection",
       },
     ],

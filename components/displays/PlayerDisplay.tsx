@@ -76,12 +76,20 @@ const PlayerDisplay = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={groupedPlayers}
-        renderItem={renderRow}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.scrollView}
-      />
+      {flatNames.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            No players. Create players or load collection from cloud.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={groupedPlayers}
+          renderItem={renderRow}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={styles.scrollView}
+        />
+      )}
 
       <PlayerEditModal
         visible={modalVisible}
@@ -91,11 +99,10 @@ const PlayerDisplay = () => {
         onDelete={handleDelete}
       />
 
-         <InfoDisplay
+      <InfoDisplay
         title="Players"
-          content="Use button in top left to load saved players from cloud (or to save current player details). Use button in top right to add players. Click player to edit details"
-        />
-
+        content="Use cloud button in top left to load saved players from cloud (or to back up current players). Use add button in top right to add players. Click player to edit details"
+      />
     </View>
   );
 };
@@ -104,7 +111,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    width: "100%", // Ensure full width
+    width: "100%",
+    position: "relative", // Added to ensure InfoDisplay positioning works correctly
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 18,
+    textAlign: "center",
+    lineHeight: 26,
   },
   scrollView: {
     padding: 0,
@@ -113,7 +132,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
-    width: "100%", // Ensure full width
+    width: "100%",
   },
   column: {
     flex: 1,
@@ -123,14 +142,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 5,
-    width: "100%", // Ensure container takes full width
+    width: "100%",
   },
   text: {
     fontSize: 17,
     lineHeight: 24,
     paddingLeft: 0,
-    flex: 1, // Allow text to take available space
-    flexShrink: 1, // Allow text to shrink
+    flex: 1,
+    flexShrink: 1,
   },
 });
 

@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { Text } from "../Themed";
 import { FontAwesome } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider";
 import { useNames } from "@/context/NamesContext";
 
 const AddName = () => {
@@ -65,15 +64,61 @@ const AddName = () => {
                 value={name}
                 onChangeText={setName}
               />
-              <Text>Score: {score}</Text>
-              <Slider
-                style={styles.slider}
-                minimumValue={1}
-                maximumValue={5}
-                step={1}
-                value={score}
-                onValueChange={setScore}
-              />
+              <Text
+                style={[
+                  styles.scoreLabel,
+                  { color: colorScheme === "dark" ? "white" : "black" },
+                ]}
+              >
+                Score: {score}
+              </Text>
+              <View style={styles.scoreButtonsContainer}>
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <TouchableOpacity
+                    key={s}
+                    style={[
+                      styles.scoreButton,
+                      {
+                        backgroundColor:
+                          colorScheme === "dark"
+                            ? score === s
+                              ? "#007BFF"
+                              : "#555"
+                            : score === s
+                            ? "#007BFF"
+                            : "#f0f0f0",
+                        borderColor:
+                          colorScheme === "dark"
+                            ? score === s
+                              ? "#0056b3"
+                              : "#777"
+                            : score === s
+                            ? "#0056b3"
+                            : "#ccc",
+                      },
+                      score === s && styles.scoreButtonActive,
+                    ]}
+                    onPress={() => setScore(s)}
+                  >
+                    <Text
+                      style={[
+                        styles.scoreButtonText,
+                        {
+                          color:
+                            colorScheme === "dark"
+                              ? "white"
+                              : score === s
+                              ? "white"
+                              : "black",
+                        },
+                        score === s && styles.scoreButtonTextActive,
+                      ]}
+                    >
+                      {s}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   onPress={handleAdd}
@@ -129,6 +174,37 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 10,
     borderRadius: 5,
+  },
+  scoreLabel: {
+    alignSelf: "flex-start",
+    marginTop: 10,
+    marginBottom: 5,
+    fontSize: 16,
+  },
+  scoreButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginVertical: 10,
+  },
+  scoreButton: {
+    width: 45,
+    height: 45,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+  scoreButtonActive: {
+    // backgroundColor is handled dynamically based on colorScheme
+    // borderColor is handled dynamically based on colorScheme
+  },
+  scoreButtonText: {
+    fontSize: 18,
+    fontWeight: "500",
+  },
+  scoreButtonTextActive: {
+    // color is handled dynamically based on colorScheme
   },
   buttonRow: {
     flexDirection: "row",

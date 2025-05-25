@@ -108,6 +108,7 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
   const handleSaveAsNewContinue = () => {
     if (!collectionName.trim()) {
       Alert.alert("Validation Error", "Collection name cannot be empty.");
+      setSaveCollectionModalVisible(true); // Re-show modal to allow correction
       return;
     }
     setSaveCollectionModalVisible(false);
@@ -134,8 +135,8 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
                     {
                       text: "Cancel",
                       style: "cancel",
-                      onPress: () => confirmSaveMobile(name, ""),
-                    }, // Or handle as needed
+                      onPress: () => onClose(), // Abort entire save if password setting is cancelled
+                    },
                     {
                       text: "Set",
                       onPress: (pwd) => confirmSaveMobile(name, pwd || ""),
@@ -208,7 +209,7 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
         pwd ? "\n\nThis collection will be password protected." : ""
       }`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: "Cancel", style: "cancel", onPress: () => onClose() }, // Abort if final confirmation is cancelled
         { text: "Save", onPress: async () => await executeSave(name, pwd) },
       ]
     );
@@ -285,7 +286,10 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
       <Modal
         transparent={true}
         visible={saveCollectionModalVisible}
-        onRequestClose={() => setSaveCollectionModalVisible(false)}
+        onRequestClose={() => {
+          setSaveCollectionModalVisible(false);
+          setSaveOptionsModalVisible(true); // Go back to options instead of closing all
+        }}
       >
         <View style={styles.modalContainer}>
           <View
@@ -353,7 +357,10 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
       <Modal
         transparent={true}
         visible={collectionsModalVisible}
-        onRequestClose={() => setCollectionsModalVisible(false)}
+        onRequestClose={() => {
+          setCollectionsModalVisible(false);
+          setSaveOptionsModalVisible(true); // Go back to options instead of closing all
+        }}
       >
         <View style={styles.modalContainer}>
           <View
@@ -448,7 +455,10 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
         <Modal
           transparent={true}
           visible={savePasswordPromptVisible}
-          onRequestClose={() => setSavePasswordPromptVisible(false)}
+          onRequestClose={() => {
+            setSavePasswordPromptVisible(false);
+            onClose(); // Abort entire save
+          }}
         >
           <View style={styles.modalContainer}>
             <View
@@ -504,6 +514,7 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
           onRequestClose={() => {
             setSavePasswordDialogVisible(false);
             setPassword("");
+            onClose(); // Abort entire save
           }}
         >
           <View style={styles.modalContainer}>
@@ -567,9 +578,11 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
                   onPress={() => {
                     setSavePasswordDialogVisible(false);
                     setPassword("");
-                    // Optionally, go back to password choice for web
-                    if (Platform.OS === "web")
-                      setSavePasswordPromptVisible(true);
+                    if (Platform.OS === "web") {
+                      setSavePasswordPromptVisible(true); // Go back for web
+                    } else {
+                      onClose(); // Abort for Android if password entry is cancelled
+                    }
                   }}
                 >
                   <FontAwesome name="times" size={16} color="white" />
@@ -593,7 +606,10 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
         <Modal
           transparent={true}
           visible={confirmSaveDialogVisible}
-          onRequestClose={() => setConfirmSaveDialogVisible(false)}
+          onRequestClose={() => {
+            setConfirmSaveDialogVisible(false);
+            onClose(); // Abort entire save
+          }}
         >
           <View style={styles.modalContainer}>
             <View
@@ -626,7 +642,10 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   style={[styles.button, styles.cancelButton]}
-                  onPress={() => setConfirmSaveDialogVisible(false)}
+                  onPress={() => {
+                    setConfirmSaveDialogVisible(false);
+                    onClose(); // Abort entire save
+                  }}
                 >
                   <FontAwesome name="times" size={16} color="white" />
                   <Text style={styles.buttonText}>Cancel</Text>

@@ -11,7 +11,7 @@ import { NamesProvider } from "@/context/NamesContext";
 
 import RepulsorManagerButton from "@/components/displays/RepulsorManagerButton";
 import AddName from "@/components/buttonmodals/AddName";
-import CloudSync from "@/components/buttonmodals/CloudSync";
+import CloudSync from "@/components/CloudSync/CloudSync";
 import SelectAllButton from "@/components/buttonmodals/SelectAllButton";
 
 import RandomizeTeamsRandomizeIcon from "@/components/buttonmodals/RandomiseTeamsRandomiseIcon";

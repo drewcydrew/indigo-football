@@ -180,11 +180,14 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
   };
 
   const executeSave = async (name: string, pwd?: string) => {
+    // Ensure that an empty string password is treated as undefined (no password)
+    // This helps standardize the "no password" case for the saveToFirestore function.
+    const effectivePassword = pwd === "" ? undefined : pwd;
     try {
       setCurrentCollection(name);
-      await saveToFirestore(name, pwd);
+      await saveToFirestore(name, effectivePassword);
       const successMessage = `Data saved to "${name}" collection successfully${
-        pwd ? " (Password Protected)" : ""
+        effectivePassword ? " (Password Protected)" : ""
       }`;
       if (Platform.OS === "web") {
         showWebStatusDialog(successMessage, true);

@@ -94,7 +94,9 @@ interface NamesContextType {
   setAlgorithm: (value: string) => void; // Add algorithm setter
   currentCollection: string; // Add current collection state
   setCurrentCollection: (value: string) => void; // Add setter for current collection
-  listCollections: () => Promise<{name: string; lastUpdated: string; hasPassword: boolean}[]>;
+  listCollections: () => Promise<
+    { name: string; lastUpdated: string; hasPassword: boolean }[]
+  >;
 }
 
 const NamesContext = createContext<NamesContextType | undefined>(undefined);
@@ -111,10 +113,6 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [algorithm, setAlgorithm] = useState("scores");
 
   const [currentCollection, setCurrentCollection] = useState<string>("teams");
-
-  
-  
-
 
   useEffect(() => {
     if (isLoading) return;
@@ -187,25 +185,27 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     loadData();
   }, []);
 
-  const listCollections = async (): Promise<{name: string; lastUpdated: string; hasPassword: boolean}[]> => {
-      try {
-        // Get the collections registry
-        const registryDoc = await getDoc(doc(db, "_collections", "registry"));
-        
-        if (!registryDoc.exists()) {
-          return [];
-        }
-        
-        const collectionsData = registryDoc.data().collections || [];
-        return collectionsData.sort((a: any, b: any) => 
-          new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
-        );
-      } catch (error) {
-        console.error("Error listing collections:", error);
+  const listCollections = async (): Promise<
+    { name: string; lastUpdated: string; hasPassword: boolean }[]
+  > => {
+    try {
+      // Get the collections registry
+      const registryDoc = await getDoc(doc(db, "_collections", "registry"));
+
+      if (!registryDoc.exists()) {
         return [];
       }
-    };
-  
+
+      const collectionsData = registryDoc.data().collections || [];
+      return collectionsData.sort(
+        (a: any, b: any) =>
+          new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+      );
+    } catch (error) {
+      console.error("Error listing collections:", error);
+      return [];
+    }
+  };
 
   // Save data when state changes
   useEffect(() => {
@@ -417,26 +417,40 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     try {
       const collection = collectionName || currentCollection;
 
+      const sanitizePlayer = (player: Player): Player => {
+        return {
+          name: player.name || "Unknown Player", // Fallback for name
+          score: typeof player.score === "number" ? player.score : 1, // Default score
+          included:
+            typeof player.included === "boolean" ? player.included : true, // Default included
+          bio: player.bio || "", // Ensure bio is a string, not undefined
+          matches: typeof player.matches === "number" ? player.matches : 0, // Default matches
+        };
+      };
+
       const processedNames = names
         .map((team, teamIndex) => {
-          return team.map(
-            (player, playerIndex) =>
-              ({
-                ...player,
-                teamIndex,
-                playerIndex,
-              } as FirestorePlayer)
-          );
+          return team.map((player, playerIndex) => {
+            const sanitizedPlayer = sanitizePlayer(player); // Sanitize each player
+            return {
+              ...sanitizedPlayer,
+              teamIndex,
+              playerIndex,
+            } as FirestorePlayer;
+          });
         })
         .flat();
 
       // Create the data object
+      // Define a more specific type if possible, instead of relying on StorageData directly for Firestore
       const dataToSave = {
         players: processedNames,
-        teamNames,
-        teamColors,
+        teamNames: teamNames || {}, // Ensure teamNames is an object
+        teamColors: teamColors || {}, // Ensure teamColors is an object
         showScores,
         numTeams,
+        algorithm: algorithm || "scores", // Ensure algorithm is a string
+        repulsors: repulsors || [], // Ensure repulsors is an array
         lastUpdated: new Date().toISOString(),
       };
 
@@ -463,38 +477,36 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
 
       const registryRef = doc(db, "_collections", "registry");
       const registryDoc = await getDoc(registryRef);
-      
+
       const collectionEntry = {
         name: collection,
         hasPassword: !!password,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       };
 
       if (registryDoc.exists()) {
         const registryData = registryDoc.data();
         const collections = registryData.collections || [];
-        
+
         // Remove existing entry with same name if it exists
-        const filteredCollections = collections.filter((c: any) => c.name !== collection);
-        
+        const filteredCollections = collections.filter(
+          (c: any) => c.name !== collection
+        );
+
         // Add the updated entry
         await setDoc(registryRef, {
-          collections: [...filteredCollections, collectionEntry]
+          collections: [...filteredCollections, collectionEntry],
         });
       } else {
         // Create new registry with this collection
         await setDoc(registryRef, {
-          collections: [collectionEntry]
+          collections: [collectionEntry],
         });
       }
-
-      
     } catch (error) {
       console.error("Error saving to Firestore:", error);
       throw error;
     }
-
-    
   };
 
   const loadFromFirestore = async (
@@ -535,26 +547,71 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Password is correct or not needed, reconstruct data
-      const reconstructedNames: Player[][] = Array(numTeams)
-        .fill([])
+      // Use numTeams from Firestore data if available, otherwise use current state's numTeams as a fallback
+      const numberOfTeamsToReconstruct =
+        typeof data.numTeams === "number" ? data.numTeams : numTeams;
+      const reconstructedNames: Player[][] = Array(numberOfTeamsToReconstruct)
+        .fill(null) // Use null for map to work correctly with empty slots
         .map(() => []);
 
-      (data.players as FirestorePlayer[]).forEach((player) => {
-        if (!reconstructedNames[player.teamIndex]) {
-          reconstructedNames[player.teamIndex] = [];
-        }
-        const { teamIndex, playerIndex, ...cleanPlayer } = player;
-        reconstructedNames[player.teamIndex].push(cleanPlayer);
-      });
+      if (data.players && Array.isArray(data.players)) {
+        (data.players as FirestorePlayer[]).forEach((player) => {
+          // Sanitize loaded player data
+          const cleanPlayer: Player = {
+            name: player.name || "Unknown Player",
+            score: typeof player.score === "number" ? player.score : 1,
+            included:
+              typeof player.included === "boolean" ? player.included : true,
+            bio: player.bio || "",
+            matches: typeof player.matches === "number" ? player.matches : 0,
+          };
+
+          if (
+            player.teamIndex >= 0 &&
+            player.teamIndex < numberOfTeamsToReconstruct
+          ) {
+            if (!reconstructedNames[player.teamIndex]) {
+              reconstructedNames[player.teamIndex] = []; // Should be redundant due to pre-initialization
+            }
+            reconstructedNames[player.teamIndex].push(cleanPlayer);
+          } else {
+            // Handle players with out-of-bounds teamIndex, e.g., add to a default team or log warning
+            // For now, let's add to the first team if teamIndex is invalid
+            console.warn(
+              `Player ${player.name} has invalid teamIndex ${player.teamIndex}. Adding to team 0.`
+            );
+            if (reconstructedNames[0]) {
+              reconstructedNames[0].push(cleanPlayer);
+            } else if (numberOfTeamsToReconstruct > 0) {
+              reconstructedNames[0] = [cleanPlayer]; // If team 0 was not initialized due to 0 teams
+            }
+          }
+        });
+      }
 
       setNames(reconstructedNames);
 
       // Load team names and colors if available
       if (data.teamNames) {
         setTeamNames(data.teamNames);
+      } else {
+        setTeamNames({}); // Reset if not in Firestore data
       }
       if (data.teamColors) {
         setTeamColors(data.teamColors);
+      } else {
+        setTeamColors({}); // Reset if not in Firestore data
+      }
+      // Load algorithm and repulsors if available
+      if (data.algorithm) {
+        setAlgorithm(data.algorithm);
+      } else {
+        setAlgorithm("scores"); // Reset to default if not in Firestore data
+      }
+      if (data.repulsors) {
+        setRepulsors(data.repulsors);
+      } else {
+        setRepulsors([]); // Reset if not in Firestore data
       }
 
       setShowScores(data.showScores ?? true);

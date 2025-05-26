@@ -6,7 +6,6 @@ import {
   Modal,
   TouchableOpacity,
   useColorScheme,
-  TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
 import { Text } from "../Themed";
@@ -44,101 +43,100 @@ const AddName = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={dismissKeyboard}>
-          <View style={styles.modalContainer}>
-            <View
+        <View style={styles.modalContainer}>
+          <View
+            style={[
+              styles.modalView,
+              { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
+            ]}
+          >
+            <Text style={styles.modalTitle}>Add New Player</Text>
+            <TextInput
               style={[
-                styles.modalView,
-                { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
+                styles.input,
+                { color: colorScheme === "dark" ? "white" : "black" },
+                { borderColor: colorScheme === "dark" ? "#555" : "#ccc" },
+              ]}
+              placeholder="Enter name"
+              placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"} // Changed #999 to #888
+              value={name}
+              onChangeText={setName}
+              autoFocus={true} // Added autoFocus
+            />
+            <Text
+              style={[
+                styles.scoreLabel,
+                { color: colorScheme === "dark" ? "white" : "black" },
               ]}
             >
-              <Text style={styles.modalTitle}>Add New Player</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  { color: colorScheme === "dark" ? "white" : "black" },
-                  { borderColor: colorScheme === "dark" ? "#555" : "#ccc" },
-                ]}
-                placeholder="Enter name"
-                placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#999"}
-                value={name}
-                onChangeText={setName}
-              />
-              <Text
-                style={[
-                  styles.scoreLabel,
-                  { color: colorScheme === "dark" ? "white" : "black" },
-                ]}
-              >
-                Score: {score}
-              </Text>
-              <View style={styles.scoreButtonsContainer}>
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <TouchableOpacity
-                    key={s}
-                    style={[
-                      styles.scoreButton,
-                      {
-                        backgroundColor:
-                          colorScheme === "dark"
-                            ? score === s
-                              ? "#007BFF"
-                              : "#555"
-                            : score === s
+              Score: {score}
+            </Text>
+            <View style={styles.scoreButtonsContainer}>
+              {[1, 2, 3, 4, 5].map((s) => (
+                <TouchableOpacity
+                  key={s}
+                  style={[
+                    styles.scoreButton,
+                    {
+                      backgroundColor:
+                        colorScheme === "dark"
+                          ? score === s
                             ? "#007BFF"
-                            : "#f0f0f0",
-                        borderColor:
-                          colorScheme === "dark"
-                            ? score === s
-                              ? "#0056b3"
-                              : "#777"
-                            : score === s
+                            : "#555"
+                          : score === s
+                          ? "#007BFF"
+                          : "#f0f0f0",
+                      borderColor:
+                        colorScheme === "dark"
+                          ? score === s
                             ? "#0056b3"
-                            : "#ccc",
+                            : "#777"
+                          : score === s
+                          ? "#0056b3"
+                          : "#ccc",
+                    },
+                    score === s && styles.scoreButtonActive,
+                  ]}
+                  onPress={() => setScore(s)}
+                >
+                  <Text
+                    style={[
+                      styles.scoreButtonText,
+                      {
+                        color:
+                          colorScheme === "dark"
+                            ? "white"
+                            : score === s
+                            ? "white"
+                            : "black",
                       },
-                      score === s && styles.scoreButtonActive,
+                      score === s && styles.scoreButtonTextActive,
                     ]}
-                    onPress={() => setScore(s)}
                   >
-                    <Text
-                      style={[
-                        styles.scoreButtonText,
-                        {
-                          color:
-                            colorScheme === "dark"
-                              ? "white"
-                              : score === s
-                              ? "white"
-                              : "black",
-                        },
-                        score === s && styles.scoreButtonTextActive,
-                      ]}
-                    >
-                      {s}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  onPress={handleAdd}
-                  style={[styles.button, styles.saveButton]}
-                >
-                  <FontAwesome name="check" size={16} color="white" />
-                  <Text style={styles.buttonText}>Add</Text>
+                    {s}
+                  </Text>
                 </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                onPress={handleAdd}
+                style={[styles.button, styles.saveButton]}
+              >
+                <FontAwesome name="check" size={16} color="white" />
+                <Text style={styles.buttonText}>Add</Text>
+              </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => setModalVisible(false)}
-                  style={[styles.button, styles.cancelButton]}
-                >
-                  <FontAwesome name="times" size={16} color="white" />
-                  <Text style={styles.buttonText}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={[styles.button, styles.cancelButton]}
+              >
+                <FontAwesome name="times" size={16} color="white" />
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </Modal>
     </View>
   );

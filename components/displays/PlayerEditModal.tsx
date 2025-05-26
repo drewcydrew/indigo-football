@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   useColorScheme,
   Keyboard,
-  TouchableWithoutFeedback,
   InputAccessoryView,
   Platform,
 } from "react-native";
@@ -67,89 +66,94 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <TouchableWithoutFeedback onPress={dismissKeyboard}>
-        <View style={styles.modalContainer}>
-          <View
+      {/* <TouchableWithoutFeedback onPress={dismissKeyboard}> */}
+      <View style={styles.modalContainer}>
+        <View
+          style={[
+            styles.modalView,
+            { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
+          ]}
+        >
+          <Text style={styles.modalTitle}>Edit Player</Text>
+          <TextInput
             style={[
-              styles.modalView,
-              { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
+              styles.input,
+              { color: colorScheme === "dark" ? "white" : "black" },
+              { borderColor: colorScheme === "dark" ? "#555" : "#ccc" }, // Added dynamic borderColor
             ]}
-          >
-            <Text style={styles.modalTitle}>Edit Player</Text>
-            <TextInput
-              style={[
-                styles.input,
-                { color: colorScheme === "dark" ? "white" : "black" },
-              ]}
-              value={editedName}
-              onChangeText={setEditedName}
-              placeholder="Name"
-              placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#999"}
-            />
-            <Text style={styles.scoreLabel}>Score:</Text>
-            <View style={styles.scoreButtonsContainer}>
-              {[1, 2, 3, 4, 5].map((score) => (
-                <TouchableOpacity
-                  key={score}
+            value={editedName}
+            onChangeText={setEditedName}
+            placeholder="Name"
+            placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"} // Changed #999 to #888
+            autoFocus={true} // Added autoFocus
+          />
+          <Text style={styles.scoreLabel}>Score:</Text>
+          <View style={styles.scoreButtonsContainer}>
+            {[1, 2, 3, 4, 5].map((score) => (
+              <TouchableOpacity
+                key={score}
+                style={[
+                  styles.scoreButton,
+                  editedScore === score && styles.scoreButtonActive,
+                ]}
+                onPress={() => setEditedScore(score)}
+              >
+                <Text
                   style={[
-                    styles.scoreButton,
-                    editedScore === score && styles.scoreButtonActive,
-                  ]}
-                  onPress={() => setEditedScore(score)}
-                >
-                  <Text style={[
                     styles.scoreButtonText,
-                    editedScore === score && styles.scoreButtonTextActive
-                  ]}>
-                    {score}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <TextInput
-              style={[
-                styles.input,
-                styles.textArea,
-                { color: colorScheme === "dark" ? "white" : "black" },
-              ]}
-              value={editedBio}
-              onChangeText={setEditedBio}
-              placeholder="Bio"
-              placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#999"}
-              multiline={true}
-              numberOfLines={4}
-            />
-
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                onPress={handleSave}
-                style={[styles.button, styles.saveButton]}
-              >
-                <FontAwesome name="check" size={16} color="white" />
-                <Text style={styles.buttonText}>Save</Text>
+                    editedScore === score && styles.scoreButtonTextActive,
+                  ]}
+                >
+                  {score}
+                </Text>
               </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={onClose}
-                style={[styles.button, styles.cancelButton]}
-              >
-                <FontAwesome name="times" size={16} color="white" />
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-
-            {onDelete && player && (
-              <TouchableOpacity
-                onPress={handleDelete}
-                style={[styles.button, styles.deleteButton]}
-              >
-                <FontAwesome name="trash" size={16} color="white" />
-                <Text style={styles.buttonText}>Delete Player</Text>
-              </TouchableOpacity>
-            )}
+            ))}
           </View>
+          <TextInput
+            style={[
+              styles.input,
+              styles.textArea,
+              { color: colorScheme === "dark" ? "white" : "black" },
+              { borderColor: colorScheme === "dark" ? "#555" : "#ccc" }, // Added dynamic borderColor
+            ]}
+            value={editedBio}
+            onChangeText={setEditedBio}
+            placeholder="Bio"
+            placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"} // Changed #999 to #888
+            multiline={true}
+            numberOfLines={4}
+          />
+
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              onPress={handleSave}
+              style={[styles.button, styles.saveButton]}
+            >
+              <FontAwesome name="check" size={16} color="white" />
+              <Text style={styles.buttonText}>Save</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={onClose}
+              style={[styles.button, styles.cancelButton]}
+            >
+              <FontAwesome name="times" size={16} color="white" />
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+
+          {onDelete && player && (
+            <TouchableOpacity
+              onPress={handleDelete}
+              style={[styles.button, styles.deleteButton]}
+            >
+              <FontAwesome name="trash" size={16} color="white" />
+              <Text style={styles.buttonText}>Delete Player</Text>
+            </TouchableOpacity>
+          )}
         </View>
-      </TouchableWithoutFeedback>
+      </View>
+      {/* </TouchableWithoutFeedback> */}
     </Modal>
   );
 };
@@ -190,37 +194,37 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   scoreLabel: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginTop: 10,
     marginBottom: 5,
   },
   scoreButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
     marginBottom: 10,
   },
   scoreButton: {
     width: 45,
     height: 45,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   scoreButtonActive: {
-    backgroundColor: '#007BFF',
-    borderColor: '#0056b3',
+    backgroundColor: "#007BFF",
+    borderColor: "#0056b3",
   },
   scoreButtonText: {
     fontSize: 18,
-    fontWeight: '500',
-    color: 'black',
+    fontWeight: "500",
+    color: "black",
   },
   scoreButtonTextActive: {
-    color: 'white',
+    color: "white",
   },
   buttonRow: {
     flexDirection: "row",

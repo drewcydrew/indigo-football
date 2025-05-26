@@ -26,7 +26,7 @@ interface Link {
 const links: Link[] = [
   {
     title: "Install on Android",
-    url: "https://expo.dev/accounts/drew92/projects/indigo-football/builds/1cd2cf43-6177-4536-82ee-eec4010f4af2",
+    url: "https://expo.dev/accounts/drew92/projects/indigo-football/builds/67829632-85e3-4378-bc73-82ada0c1a307",
     icon: <FontAwesome name="android" size={20} color="white" />,
   },
   {

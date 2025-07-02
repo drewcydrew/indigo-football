@@ -61,7 +61,7 @@ function App() {
         <section>
           <h2>Contact Us</h2>
           <p>If you have any questions about this Privacy Policy, please contact us at:</p>
-          <p>Email: privacy@yourapp.com</p>
+          <p>Email: andrewjovaras@gmail.com</p>
         </section>
       </div>
     </>

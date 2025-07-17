@@ -8,7 +8,7 @@ import {
 } from "react";
 import { saveToStorage, loadFromStorage } from "../utils/crossPlatformStorage";
 import { db } from "../firebase/config";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 
 import { sha256 } from "js-sha256";
 
@@ -91,6 +91,10 @@ interface NamesContextType {
     password?: string | null,
     checkPasswordOnly?: boolean
   ) => Promise<any>;
+  deleteFromFirestore: (
+    collectionName?: string,
+    password?: string | null
+  ) => Promise<void>;
   algorithm: string; // Add algorithm state
   setAlgorithm: (value: string) => void; // Add algorithm setter
   currentCollection: string; // Add current collection state
@@ -653,6 +657,81 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const deleteFromFirestore = async (
+    collectionName?: string,
+    password?: string | null
+  ) => {
+    try {
+      const collection = collectionName || currentCollection;
+
+      // Check if this is a demo team that shouldn't be deleted
+      const demoTeams = [
+        "tottenham hotspurs",
+        "ac milan",
+        "celtic fc",
+        "real madrid",
+      ];
+
+      if (demoTeams.includes(collection.toLowerCase())) {
+        throw new Error("Cannot delete demo collections");
+      }
+
+      // First check if collection exists and if it's password protected
+      const docRef = doc(db, collection, "current");
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        throw new Error(`Collection "${collection}" not found`);
+      }
+
+      const data = docSnap.data();
+      const isPasswordProtected = !!data._passwordHash;
+
+      // Check if password is required but not provided
+      if (isPasswordProtected && !password) {
+        throw new Error("Password required");
+      }
+
+      // Verify password if collection is protected
+      if (isPasswordProtected && password) {
+        const passwordHash = sha256(password);
+        if (passwordHash !== data._passwordHash) {
+          throw new Error("Incorrect password");
+        }
+      }
+
+      // Delete the collection documents
+      await deleteDoc(doc(db, collection, "current"));
+      await deleteDoc(doc(db, collection, "metadata"));
+
+      // Update the collections registry
+      const registryRef = doc(db, "_collections", "registry");
+      const registryDoc = await getDoc(registryRef);
+
+      if (registryDoc.exists()) {
+        const registryData = registryDoc.data();
+        const collections = registryData.collections || [];
+
+        // Remove the deleted collection from registry
+        const filteredCollections = collections.filter(
+          (c: any) => c.name !== collection
+        );
+
+        await setDoc(registryRef, {
+          collections: filteredCollections,
+        });
+      }
+
+      // If we deleted the current collection, reset to default
+      if (collection === currentCollection) {
+        setCurrentCollection("Players");
+      }
+    } catch (error) {
+      console.error("Error deleting from Firestore:", error);
+      throw error;
+    }
+  };
+
   if (isLoading) {
     return null;
   }
@@ -678,6 +757,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         deletePlayer,
         saveToFirestore,
         loadFromFirestore,
+        deleteFromFirestore,
         repulsors,
         addRepulsor,
         removeRepulsor,

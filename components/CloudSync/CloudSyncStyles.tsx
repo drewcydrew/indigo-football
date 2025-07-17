@@ -7,6 +7,41 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    minHeight: 400, // Increase this to accommodate all buttons
+    width: "90%",
+    maxWidth: 400,
+  },
+
+  optionsContainer: {
+    width: "100%",
+    marginVertical: 20,
+    gap: 15, // Add gap between buttons for better spacing
+  },
+
+  button: {
+    borderRadius: 8,
+    padding: 15,
+    elevation: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 50, // Ensure consistent button height
+    width: "100%",
+  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -15,27 +50,18 @@ export const styles = StyleSheet.create({
     // Ensure full screen coverage on web if needed
     // height: Platform.OS === 'web' ? '100vh' : '100%',
   },
-  modalView: {
-    width: 300, // Default width
-    padding: 20,
-    maxHeight: "80%", // Max height to prevent overflow
-    borderRadius: 10,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
+
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 15,
     textAlign: "center",
   },
-  optionsContainer: {
-    width: "100%",
-    marginBottom: 15,
+
+  deleteButton: {
+    backgroundColor: "#f44336", // Red for delete actions
+    flex: 1,
+    marginLeft: 5,
   },
   buttonRow: {
     flexDirection: "row",
@@ -59,16 +85,6 @@ export const styles = StyleSheet.create({
   collectionDateText: {
     fontSize: 12,
     // color will be set by theme or default
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    marginVertical: 5,
-    // width: "100%", // Applied in specific cases or via buttonRow
   },
   saveButton: {
     backgroundColor: "#4CAF50", // Green

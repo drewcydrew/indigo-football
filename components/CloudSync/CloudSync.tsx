@@ -1,30 +1,25 @@
 import React, { useState } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Modal,
-  useColorScheme,
-  // Platform, // No longer needed directly here for complex logic
-} from "react-native";
-// Import Text from Themed if you are using it for the title, otherwise from react-native
-import { Text } from "../Themed"; // Or import { Text } from "react-native";
+import { View, TouchableOpacity, Modal, useColorScheme } from "react-native";
+import { Text } from "../Themed";
 import { useNames } from "../../context/NamesContext";
-import Icon from "react-native-vector-icons/Ionicons"; // Or your preferred Icon set
-import FontAwesome from "react-native-vector-icons/FontAwesome"; // Or your preferred Icon set
+import Icon from "react-native-vector-icons/Ionicons";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 
-// Import the new components
+// Import the components
 import LoadCloudSync from "./LoadCloudSync";
 import SaveCloudSync from "./SaveCloudSync";
+import DeleteCloudSync from "./DeleteCloudSync"; // Add this import
 
-// Import styles from the dedicated styles file
 import { styles } from "./CloudSyncStyles";
 
 const CloudSync = () => {
-  const useNamesContextHook = useNames(); // Renamed to avoid conflict if useNames is destructured
+  const useNamesContextHook = useNames();
   const colorScheme = useColorScheme();
 
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
-  const [activeFlow, setActiveFlow] = useState<"load" | "save" | null>(null);
+  const [activeFlow, setActiveFlow] = useState<
+    "load" | "save" | "delete" | null
+  >(null); // Add "delete"
 
   const handleOpenLoadFlow = () => {
     setOptionsModalVisible(false);
@@ -36,13 +31,16 @@ const CloudSync = () => {
     setActiveFlow("save");
   };
 
-  const handleFlowClose = () => {
-    setActiveFlow(null);
-    // Optionally, re-open the main options modal or just close everything
-    // setOptionsModalVisible(true); // If you want to go back to options
+  const handleOpenDeleteFlow = () => {
+    // Add this function
+    setOptionsModalVisible(false);
+    setActiveFlow("delete");
   };
 
-  // Always render the cloud icon button
+  const handleFlowClose = () => {
+    setActiveFlow(null);
+  };
+
   return (
     <View>
       {/* Cloud Icon Button - Always visible */}
@@ -50,7 +48,6 @@ const CloudSync = () => {
         style={styles.cloudIconButton}
         onPress={() => setOptionsModalVisible(true)}
       >
-        {/* Make sure Icon is imported and used correctly */}
         <Icon
           name="cloud"
           size={28}
@@ -70,7 +67,7 @@ const CloudSync = () => {
               styles.modalView,
               {
                 backgroundColor: colorScheme === "dark" ? "#2c2c2e" : "#fefefe",
-              }, // Adjusted dark/light background
+              },
             ]}
           >
             <Text
@@ -98,6 +95,15 @@ const CloudSync = () => {
                 <Icon name="cloud-download-outline" size={20} color="white" />
                 <Text style={styles.buttonText}>Load from Cloud</Text>
               </TouchableOpacity>
+
+              {/* Add Delete Button */}
+              <TouchableOpacity
+                style={[styles.button, styles.deleteButton]}
+                onPress={handleOpenDeleteFlow}
+              >
+                <FontAwesome name="trash" size={20} color="white" />
+                <Text style={styles.buttonText}>Delete Collection</Text>
+              </TouchableOpacity>
             </View>
 
             <TouchableOpacity
@@ -123,6 +129,15 @@ const CloudSync = () => {
       {/* Render Save Flow as Modal */}
       {activeFlow === "save" && (
         <SaveCloudSync
+          onClose={handleFlowClose}
+          useNamesContext={useNamesContextHook}
+          colorScheme={colorScheme}
+        />
+      )}
+
+      {/* Render Delete Flow as Modal */}
+      {activeFlow === "delete" && (
+        <DeleteCloudSync
           onClose={handleFlowClose}
           useNamesContext={useNamesContextHook}
           colorScheme={colorScheme}

@@ -42,11 +42,13 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
     // Update UI state immediately
     setLocalNumTeams(value);
     setNumTeams(value);
-    
+
     // Auto-regenerate teams when number of teams changes
     if (value !== lastGeneratedTeamNum) {
-      console.log(`Teams changed from ${lastGeneratedTeamNum} to ${value}, regenerating...`);
-      
+      console.log(
+        `Teams changed from ${lastGeneratedTeamNum} to ${value}, regenerating...`
+      );
+
       // Call generateTeams with the new value directly
       generateTeams(value); // We need to modify the hook to accept this parameter
       setLastGeneratedTeamNum(value);
@@ -57,12 +59,11 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
   const handleAlgorithmChange = () => {
     const newAlgorithm = algorithm === "scores" ? "players" : "scores";
     setAlgorithm(newAlgorithm);
-    
+
     // Pass the current team number explicitly
     generateTeams(numTeams, newAlgorithm);
   };
 
-  
   return (
     <TouchableOpacity
       style={styles.iconButton}
@@ -85,27 +86,38 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
           >
             <Text style={styles.modalText}>Settings</Text>
             <Text style={styles.settingLabel}>Number of Teams:</Text>
-            
+
             <View style={styles.teamsButtonsContainer}>
               {[2, 3, 4, 5, 6].map((teamNum) => (
                 <TouchableOpacity
                   key={teamNum}
                   style={[
                     styles.teamButton,
-                    numTeams === teamNum ? 
-                      styles.teamButtonActive : 
-                      { backgroundColor: colorScheme === "dark" ? "#555" : "#f0f0f0" },
-                    { borderColor: colorScheme === "dark" ? "#777" : "#ccc" }
+                    numTeams === teamNum
+                      ? styles.teamButtonActive
+                      : {
+                          backgroundColor:
+                            colorScheme === "dark" ? "#555" : "#f0f0f0",
+                        },
+                    { borderColor: colorScheme === "dark" ? "#777" : "#ccc" },
                   ]}
                   onPress={() => handleNumTeamsChange(teamNum)}
                 >
-                  <Text style={[
-                    styles.teamButtonText,
-                    { color: colorScheme === "dark" ? 
-                      (numTeams === teamNum ? "white" : "#eee") : 
-                      (numTeams === teamNum ? "white" : "#333") 
-                    }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.teamButtonText,
+                      {
+                        color:
+                          colorScheme === "dark"
+                            ? numTeams === teamNum
+                              ? "white"
+                              : "#eee"
+                            : numTeams === teamNum
+                            ? "white"
+                            : "#333",
+                      },
+                    ]}
+                  >
                     {teamNum}
                   </Text>
                 </TouchableOpacity>
@@ -175,7 +187,6 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   iconButton: {
     padding: 8,
@@ -188,89 +199,97 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 20,
   },
   modalView: {
-    width: 300,
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 12,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
   },
   modalText: {
     fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
+    fontWeight: "600",
+    marginBottom: 24,
+    textAlign: "center",
   },
   settingLabel: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginBottom: 8,
     fontSize: 16,
+    fontWeight: "500",
   },
   teamsButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
     marginBottom: 20,
+    gap: 8,
   },
   teamButton: {
-    width: 45,
-    height: 45,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
   },
   teamButtonActive: {
-    backgroundColor: '#007BFF',
-    borderColor: '#0056b3',
+    backgroundColor: "#007BFF",
+    borderColor: "#0056b3",
   },
   teamButtonText: {
-    fontSize: 18,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: "500",
   },
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 10,
+    marginBottom: 20,
     width: "100%",
     justifyContent: "space-between",
   },
   switchLabel: {
     fontSize: 16,
-  },
-  repulsorContainer: {
-    marginVertical: 10,
-    width: "100%",
-    alignItems: "center",
+    fontWeight: "500",
   },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 10,
+    marginTop: 8,
   },
   button: {
-    flex: 1,
+    flexDirection: "row",
     alignItems: "center",
-    padding: 10,
-    marginHorizontal: 5,
-    backgroundColor: "#007bff",
-    borderRadius: 5,
+    justifyContent: "center",
+    padding: 12,
+    borderRadius: 8,
+    minHeight: 48,
+    backgroundColor: "#607D8B",
   },
   buttonText: {
     color: "white",
     fontSize: 16,
+    fontWeight: "500",
+    marginLeft: 8,
   },
   algorithmToggle: {
     backgroundColor: "#007bff",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    minWidth: 70,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    minWidth: 80,
     alignItems: "center",
+    minHeight: 48,
   },
   algorithmText: {
     color: "white",
     fontWeight: "500",
+    fontSize: 16,
   },
 });
 

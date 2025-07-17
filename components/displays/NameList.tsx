@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { View, FlatList, StyleSheet, useColorScheme } from "react-native";
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  useColorScheme,
+  TouchableOpacity,
+} from "react-native";
 import { Text } from "../Themed";
 import { CheckBox } from "react-native-elements";
 import { useNames } from "../../context/NamesContext";
@@ -22,7 +28,11 @@ const NameList = () => {
   };
 
   const renderName = (player: Player) => (
-    <View style={styles.nameContainer}>
+    <TouchableOpacity
+      style={styles.nameContainer}
+      onPress={() => togglePlayerIncluded(player.name)}
+      activeOpacity={0.7}
+    >
       <CheckBox
         checked={player.included}
         onPress={() => togglePlayerIncluded(player.name)}
@@ -31,7 +41,7 @@ const NameList = () => {
       <Text style={[styles.text]} numberOfLines={1} ellipsizeMode="tail">
         {player.name}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderRow = ({ item }: { item: Player[] }) => (

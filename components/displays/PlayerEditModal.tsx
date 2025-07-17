@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   useColorScheme,
   Keyboard,
-  InputAccessoryView,
+  KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from "react-native";
 import { Text } from "../Themed";
 import { Player } from "../../context/NamesContext";
@@ -34,6 +35,7 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
   const [editedScore, setEditedScore] = React.useState(player?.score || 1);
   const [editedBio, setEditedBio] = React.useState(player?.bio || "");
   const colorScheme = useColorScheme();
+  const { width, height } = Dimensions.get("window");
 
   useEffect(() => {
     if (player) {
@@ -55,229 +57,260 @@ const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
     }
   };
 
-  const dismissKeyboard = () => {
-    Keyboard.dismiss();
-  };
+  const isDark = colorScheme === "dark";
+  const modalBackgroundColor = isDark ? "#333" : "#fff";
+  const textColor = isDark ? "white" : "black";
+  const borderColor = isDark ? "#555" : "#ccc";
+  const placeholderColor = isDark ? "#aaa" : "#888";
 
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType="fade"
       transparent={true}
       onRequestClose={onClose}
     >
-      {/* <TouchableWithoutFeedback onPress={dismissKeyboard}> */}
-      <View style={styles.modalContainer}>
-        <View
-          style={[
-            styles.modalView,
-            { backgroundColor: colorScheme === "dark" ? "#333" : "#fff" },
-          ]}
-        >
-          <Text style={styles.modalTitle}>Edit Player</Text>
-          <TextInput
+      <KeyboardAvoidingView
+        style={styles.modalOverlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <View style={styles.modalContainer}>
+          <View
             style={[
-              styles.input,
-              { color: colorScheme === "dark" ? "white" : "black" },
-              { borderColor: colorScheme === "dark" ? "#555" : "#ccc" }, // Added dynamic borderColor
+              styles.modalContent,
+              { backgroundColor: modalBackgroundColor },
             ]}
-            value={editedName}
-            onChangeText={setEditedName}
-            placeholder="Name"
-            placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"} // Changed #999 to #888
-            autoFocus={true} // Added autoFocus
-          />
-          <Text style={styles.scoreLabel}>Score:</Text>
-          <View style={styles.scoreButtonsContainer}>
-            {[1, 2, 3, 4, 5].map((score) => (
-              <TouchableOpacity
-                key={score}
+          >
+            <Text style={[styles.modalTitle, { color: textColor }]}>
+              {player ? "Edit Player" : "Add Player"}
+            </Text>
+
+            <View style={styles.inputContainer}>
+              <Text style={[styles.inputLabel, { color: textColor }]}>
+                Name
+              </Text>
+              <TextInput
                 style={[
-                  styles.scoreButton,
-                  editedScore === score && styles.scoreButtonActive,
+                  styles.input,
+                  {
+                    color: textColor,
+                    borderColor: borderColor,
+                    backgroundColor: isDark ? "#444" : "#f9f9f9",
+                  },
                 ]}
-                onPress={() => setEditedScore(score)}
-              >
-                <Text
-                  style={[
-                    styles.scoreButtonText,
-                    editedScore === score && styles.scoreButtonTextActive,
-                  ]}
+                value={editedName}
+                onChangeText={setEditedName}
+                placeholder="Enter player name"
+                placeholderTextColor={placeholderColor}
+                autoFocus={true}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={[styles.inputLabel, { color: textColor }]}>
+                Skill Level
+              </Text>
+              <View style={styles.scoreButtonsContainer}>
+                {[1, 2, 3, 4, 5].map((score) => (
+                  <TouchableOpacity
+                    key={score}
+                    style={[
+                      styles.scoreButton,
+                      editedScore === score
+                        ? styles.scoreButtonActive
+                        : {
+                            backgroundColor:
+                              colorScheme === "dark" ? "#555" : "#f0f0f0",
+                          },
+                      {
+                        borderColor: colorScheme === "dark" ? "#777" : "#ccc",
+                      },
+                    ]}
+                    onPress={() => setEditedScore(score)}
+                  >
+                    <Text
+                      style={[
+                        styles.scoreButtonText,
+                        {
+                          color:
+                            colorScheme === "dark"
+                              ? editedScore === score
+                                ? "white"
+                                : "#eee"
+                              : editedScore === score
+                              ? "white"
+                              : "#333",
+                        },
+                      ]}
+                    >
+                      {score}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={[styles.inputLabel, { color: textColor }]}>
+                Bio (Optional)
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  styles.textArea,
+                  {
+                    color: textColor,
+                    borderColor: borderColor,
+                    backgroundColor: isDark ? "#444" : "#f9f9f9",
+                  },
+                ]}
+                value={editedBio}
+                onChangeText={setEditedBio}
+                placeholder="Enter player bio"
+                placeholderTextColor={placeholderColor}
+                multiline={true}
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <View style={styles.primaryButtonRow}>
+                <TouchableOpacity
+                  onPress={handleSave}
+                  style={[styles.button, styles.saveButton]}
                 >
-                  {score}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <FontAwesome name="check" size={16} color="white" />
+                  <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={onClose}
+                  style={[styles.button, styles.cancelButton]}
+                >
+                  <FontAwesome name="times" size={16} color="white" />
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+
+              {onDelete && player && (
+                <TouchableOpacity
+                  onPress={handleDelete}
+                  style={[styles.button, styles.deleteButton]}
+                >
+                  <FontAwesome name="trash" size={16} color="white" />
+                  <Text style={styles.buttonText}>Delete Player</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-          <TextInput
-            style={[
-              styles.input,
-              styles.textArea,
-              { color: colorScheme === "dark" ? "white" : "black" },
-              { borderColor: colorScheme === "dark" ? "#555" : "#ccc" }, // Added dynamic borderColor
-            ]}
-            value={editedBio}
-            onChangeText={setEditedBio}
-            placeholder="Bio"
-            placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"} // Changed #999 to #888
-            multiline={true}
-            numberOfLines={4}
-          />
-
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              onPress={handleSave}
-              style={[styles.button, styles.saveButton]}
-            >
-              <FontAwesome name="check" size={16} color="white" />
-              <Text style={styles.buttonText}>Save</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={onClose}
-              style={[styles.button, styles.cancelButton]}
-            >
-              <FontAwesome name="times" size={16} color="white" />
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-
-          {onDelete && player && (
-            <TouchableOpacity
-              onPress={handleDelete}
-              style={[styles.button, styles.deleteButton]}
-            >
-              <FontAwesome name="trash" size={16} color="white" />
-              <Text style={styles.buttonText}>Delete Player</Text>
-            </TouchableOpacity>
-          )}
         </View>
-      </View>
-      {/* </TouchableWithoutFeedback> */}
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalView: {
-    width: 300,
     padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 12,
+    padding: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 8,
+    elevation: 8,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
+    fontWeight: "600",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 8,
   },
   input: {
-    width: "100%",
-    padding: 10,
-    marginVertical: 10,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 48,
   },
   textArea: {
-    height: 100,
+    height: 80,
     textAlignVertical: "top",
-  },
-  scoreLabel: {
-    alignSelf: "flex-start",
-    marginTop: 10,
-    marginBottom: 5,
   },
   scoreButtonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
-    marginBottom: 10,
+    gap: 8,
   },
   scoreButton: {
-    width: 45,
-    height: 45,
+    flex: 1,
+    height: 48,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
   },
   scoreButtonActive: {
     backgroundColor: "#007BFF",
     borderColor: "#0056b3",
   },
   scoreButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "500",
-    color: "black",
   },
-  scoreButtonTextActive: {
-    color: "white",
+  buttonContainer: {
+    marginTop: 8,
   },
-  buttonRow: {
+  primaryButtonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 10,
+    gap: 12,
+    marginBottom: 12,
   },
   button: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
+    padding: 12,
+    borderRadius: 8,
+    minHeight: 48,
   },
   saveButton: {
     backgroundColor: "#4CAF50",
     flex: 1,
-    marginRight: 5,
   },
   cancelButton: {
     backgroundColor: "#607D8B",
     flex: 1,
-    marginLeft: 5,
   },
   deleteButton: {
     backgroundColor: "#F44336",
     width: "100%",
-    marginTop: 10,
   },
   buttonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "500",
     marginLeft: 8,
-  },
-  keyboardAccessory: {
-    width: "100%",
-    padding: 8,
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#ccc",
-  },
-  keyboardDoneButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  keyboardDoneText: {
-    color: "#007bff",
-    fontSize: 16,
-    fontWeight: "600",
   },
 });
 

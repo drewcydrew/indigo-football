@@ -1,4 +1,6 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width, height } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
   cloudIconButton: {
@@ -7,166 +9,156 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    minHeight: 400, // Increase this to accommodate all buttons
-    width: "90%",
-    maxWidth: 400,
-  },
-
-  optionsContainer: {
-    width: "100%",
-    marginVertical: 20,
-    gap: 15, // Add gap between buttons for better spacing
-  },
-
-  button: {
-    borderRadius: 8,
-    padding: 15,
-    elevation: 2,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 50, // Ensure consistent button height
-    width: "100%",
-  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
-    // Ensure full screen coverage on web if needed
-    // height: Platform.OS === 'web' ? '100vh' : '100%',
+    padding: 20,
   },
-
+  modalView: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+    width: "100%",
+    maxWidth: 400,
+    maxHeight: height * 0.8,
+  },
+  optionsContainer: {
+    width: "100%",
+    marginVertical: 20,
+    gap: 12,
+  },
+  button: {
+    borderRadius: 8,
+    padding: 12,
+    elevation: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 48,
+    width: "100%",
+  },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
+    fontWeight: "600",
+    marginBottom: 24,
     textAlign: "center",
   },
-
   deleteButton: {
-    backgroundColor: "#f44336", // Red for delete actions
-    flex: 1,
-    marginLeft: 5,
+    backgroundColor: "#f44336",
   },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between", // Distributes space between buttons
+    justifyContent: "space-between",
     width: "100%",
     marginTop: 15,
+    gap: 12,
   },
   collectionItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
     borderBottomWidth: 1,
     width: "100%",
+    borderRadius: 8,
+    marginBottom: 4,
   },
   collectionNameText: {
-    fontWeight: "bold",
+    fontWeight: "600",
     fontSize: 16,
   },
   collectionDateText: {
     fontSize: 12,
-    // color will be set by theme or default
+    marginTop: 2,
   },
   saveButton: {
-    backgroundColor: "#4CAF50", // Green
+    backgroundColor: "#4CAF50",
   },
   loadButton: {
-    backgroundColor: "#2196F3", // Blue
+    backgroundColor: "#2196F3",
   },
   cancelButton: {
-    backgroundColor: "#f44336", // Red or a more neutral grey like #607D8B
-    flex: 1, // Take up available space in buttonRow
-    marginRight: 5, // Space between buttons
+    backgroundColor: "#607D8B",
+    flex: 1,
   },
   confirmButton: {
-    backgroundColor: "#4CAF50", // Green
-    flex: 1, // Take up available space in buttonRow
-    marginLeft: 5, // Space between buttons
+    backgroundColor: "#4CAF50",
+    flex: 1,
   },
   buttonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "500",
-    marginLeft: 8,
     textAlign: "center",
   },
   closeButton: {
-    backgroundColor: "#607D8B", // Grey
-    marginTop: 5, // Add some space if it's the last button
-    width: "100%", // Make it full width if it's standalone
+    backgroundColor: "#607D8B",
+    marginTop: 16,
+    width: "100%",
   },
   collectionInputContainer: {
     width: "100%",
-    marginBottom: 15,
+    marginBottom: 16,
   },
   inputLabel: {
-    marginBottom: 5,
+    marginBottom: 8,
     fontWeight: "500",
-    // color will be set by theme or default
+    fontSize: 16,
   },
   collectionInput: {
     borderWidth: 1,
-    borderRadius: 5,
-    padding: 10, // Increased padding for better touch
+    borderRadius: 8,
+    padding: 12,
     width: "100%",
-    marginBottom: 10,
-    // borderColor and color will be set by theme
+    marginBottom: 4,
+    fontSize: 16,
+    minHeight: 48,
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    // borderWidth: 1, // Border can be on the TextInput itself
-    // borderRadius: 5, // Border can be on the TextInput itself
-    // marginBottom: 10, // If border is here
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 16,
   },
   eyeIcon: {
-    padding: 8, // Make it easier to tap
-    // position: "absolute", // Not needed if TextInput has flex: 1
-    // right: 5,
-    // height: "100%", // Not needed
-    // justifyContent: "center", // Not needed
+    padding: 12,
+    minWidth: 48,
+    alignItems: "center",
+    justifyContent: "center",
   },
   helperText: {
     fontSize: 12,
     fontStyle: "italic",
     opacity: 0.7,
-    marginTop: -8, // Adjust as needed if input has margin
+    marginTop: -8,
     marginBottom: 10,
     textAlign: "center",
   },
-  // Specific styles for collection list modal if different from generic modalView
   collectionsModalView: {
-    width: 350, // Wider for list content
-    // maxHeight: "80%", // Already in modalView, but can be overridden
+    width: "100%",
+    maxWidth: 450,
+    maxHeight: height * 0.8,
   },
-  // Specific style for text in ListEmptyComponent
   listEmptyText: {
     textAlign: "center",
     marginVertical: 20,
-    // color will be set by theme or default
+    fontSize: 16,
   },
-  // Style for the OK button in status dialogs
   statusOkButton: {
-    width: "100%", // Make OK button full width
+    width: "100%",
   },
 });

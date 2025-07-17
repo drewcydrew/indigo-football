@@ -66,7 +66,7 @@ const CloudSync = () => {
             style={[
               styles.modalView,
               {
-                backgroundColor: colorScheme === "dark" ? "#2c2c2e" : "#fefefe",
+                backgroundColor: colorScheme === "dark" ? "#333" : "#fff",
               },
             ]}
           >
@@ -96,7 +96,6 @@ const CloudSync = () => {
                 <Text style={styles.buttonText}>Load from Cloud</Text>
               </TouchableOpacity>
 
-              {/* Add Delete Button */}
               <TouchableOpacity
                 style={[styles.button, styles.deleteButton]}
                 onPress={handleOpenDeleteFlow}

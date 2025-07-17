@@ -135,8 +135,7 @@ const AppBanner = ({
                   </Text>
                 </View>
                 <Text style={[styles.message, { color: colors.textSecondary }]}>
-                  Your privacy matters to us. Check out our privacy policy
-                  below.
+                  Privacy Policy and User Guide available online.
                 </Text>
               </>
             )}
@@ -236,7 +235,7 @@ const AppBanner = ({
               <Text
                 style={[styles.mobileLinkButtonText, { color: colors.primary }]}
               >
-                Privacy Policy
+                Privacy Policy / User Guide
               </Text>
             </TouchableOpacity>
           </View>

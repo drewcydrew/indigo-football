@@ -85,6 +85,19 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
             ]}
           >
             <Text style={styles.modalText}>Settings</Text>
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+              activeOpacity={0.7}
+            >
+              <Icon
+                name="close"
+                size={20}
+                color={colorScheme === "dark" ? "#fff" : "#000"}
+              />
+            </TouchableOpacity>
+
             <Text style={styles.settingLabel}>Number of Teams:</Text>
 
             <View style={styles.teamsButtonsContainer}>
@@ -171,15 +184,6 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
                 thumbColor={showScores ? "#f4f3f4" : "#f4f3f4"}
               />
             </View>
-
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>OK</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </Modal>
@@ -211,12 +215,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 8,
+    position: "relative",
   },
   modalText: {
     fontSize: 20,
     fontWeight: "600",
     marginBottom: 24,
     textAlign: "center",
+    paddingRight: 30,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
   },
   settingLabel: {
     alignSelf: "flex-start",
@@ -258,24 +274,6 @@ const styles = StyleSheet.create({
   switchLabel: {
     fontSize: 16,
     fontWeight: "500",
-  },
-  buttonContainer: {
-    marginTop: 8,
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 12,
-    borderRadius: 8,
-    minHeight: 48,
-    backgroundColor: "#607D8B",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "500",
-    marginLeft: 8,
   },
   algorithmToggle: {
     backgroundColor: "#007bff",

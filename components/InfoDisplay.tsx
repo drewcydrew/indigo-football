@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  ScrollView,
   Platform,
   KeyboardAvoidingView,
   Dimensions,
@@ -86,10 +85,7 @@ const InfoDisplay: React.FC<InfoDisplayProps> = ({
                 </TouchableOpacity>
               </View>
 
-              <ScrollView
-                style={styles.modalBody}
-                showsVerticalScrollIndicator={false}
-              >
+              <View style={styles.modalBody}>
                 {typeof content === "string" ? (
                   <Text style={[styles.modalText, { color: textColor }]}>
                     {content}
@@ -97,7 +93,7 @@ const InfoDisplay: React.FC<InfoDisplayProps> = ({
                 ) : (
                   content
                 )}
-              </ScrollView>
+              </View>
 
               {/* Dismiss button in footer */}
               <View style={styles.modalFooter}>
@@ -177,7 +173,8 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     paddingHorizontal: 20,
-    flex: 1,
+    paddingVertical: 10,
+    minHeight: 60,
   },
   modalText: {
     fontSize: 16,

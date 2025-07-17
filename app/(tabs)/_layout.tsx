@@ -43,7 +43,7 @@ function TabsContent() {
       />
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <Tabs>
-        <Tabs.Screen
+        {/*<Tabs.Screen
           name="index"
           options={{
             title: "App Info",
@@ -53,9 +53,9 @@ function TabsContent() {
               <TabBarIcon name="information-circle" color={color} />
             ), // Use flag icon
           }}
-        />
+        />*/}
         <Tabs.Screen
-          name="PlayersScreen"
+          name="index"
           options={{
             title: "Players", // This sets the tab title
             headerTitle: currentCollection || "Players", // This sets the header title

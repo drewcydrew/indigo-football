@@ -32,6 +32,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     maxHeight: height * 0.8,
+    position: "relative",
   },
   optionsContainer: {
     width: "100%",
@@ -53,9 +54,11 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 24,
     textAlign: "center",
+    paddingRight: 30,
   },
   deleteButton: {
     backgroundColor: "#f44336",
+    flex: 1,
   },
   buttonRow: {
     flexDirection: "row",
@@ -104,9 +107,15 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
   closeButton: {
-    backgroundColor: "#607D8B",
-    marginTop: 16,
-    width: "100%",
+    position: "absolute",
+    top: 20,
+    right: 20,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+    backgroundColor: "transparent",
   },
   collectionInputContainer: {
     width: "100%",

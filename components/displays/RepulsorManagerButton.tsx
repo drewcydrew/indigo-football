@@ -80,6 +80,15 @@ const RepulsorManagerButton: React.FC = () => {
             <Text style={[styles.modalTitle, { color: textColor }]}>
               Player Repulsors
             </Text>
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+              activeOpacity={0.7}
+            >
+              <Icon name="close" size={20} color={textColor} />
+            </TouchableOpacity>
+
             <Text
               style={{
                 color: textColor,
@@ -197,13 +206,6 @@ const RepulsorManagerButton: React.FC = () => {
                 No repulsors defined yet
               </Text>
             )}
-
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -228,11 +230,23 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: "center",
+    position: "relative",
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
+    paddingRight: 30,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
   },
   sectionTitle: {
     fontSize: 16,
@@ -317,19 +331,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   repulsorDeleteButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  closeButton: {
-    backgroundColor: "#007bff",
-    paddingHorizontal: 30,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginTop: 20,
-    width: "100%",
-    alignItems: "center",
-  },
-  closeButtonText: {
     color: "white",
     fontWeight: "bold",
   },

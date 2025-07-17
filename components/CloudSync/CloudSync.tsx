@@ -79,6 +79,18 @@ const CloudSync = () => {
               Cloud Sync
             </Text>
 
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setOptionsModalVisible(false)}
+              activeOpacity={0.7}
+            >
+              <FontAwesome
+                name="times"
+                size={20}
+                color={colorScheme === "dark" ? "#fff" : "#000"}
+              />
+            </TouchableOpacity>
+
             <View style={styles.optionsContainer}>
               <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
@@ -104,14 +116,6 @@ const CloudSync = () => {
                 <Text style={styles.buttonText}>Delete Collection</Text>
               </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              style={[styles.button, styles.closeButton]}
-              onPress={() => setOptionsModalVisible(false)}
-            >
-              <FontAwesome name="times" size={16} color="white" />
-              <Text style={styles.buttonText}>Close</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>

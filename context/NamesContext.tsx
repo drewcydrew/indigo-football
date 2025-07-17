@@ -29,7 +29,8 @@ export interface StorageData {
   teamNames?: Record<number, string>;
   teamColors?: Record<number, string>;
   repulsors?: Repulsor[];
-  algorithm?: string; // Add algorithm to storage data
+  algorithm?: string;
+  currentCollection?: string; // Add current collection state
 }
 
 interface FirestorePlayer extends Player {
@@ -112,7 +113,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [repulsors, setRepulsors] = useState<Repulsor[]>([]);
   const [algorithm, setAlgorithm] = useState("scores");
 
-  const [currentCollection, setCurrentCollection] = useState<string>("teams");
+  const [currentCollection, setCurrentCollection] = useState<string>("Players");
 
   useEffect(() => {
     if (isLoading) return;
@@ -166,6 +167,24 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
           setAlgorithm(dataToUse.algorithm);
         }
 
+        // Load currentCollection from storage - fix the logic here
+        if (hasData && savedData.currentCollection) {
+          console.log(
+            "Using saved currentCollection:",
+            savedData.currentCollection
+          );
+          setCurrentCollection(savedData.currentCollection);
+        } else if (!hasData && DEMO_DATA.currentCollection) {
+          console.log(
+            "Using demo currentCollection:",
+            DEMO_DATA.currentCollection
+          );
+          setCurrentCollection(DEMO_DATA.currentCollection);
+        } else {
+          console.log("Using default currentCollection: Players");
+          setCurrentCollection("Players");
+        }
+
         setShowScores(dataToUse.showScores ?? true);
         setNumTeams(dataToUse.numTeams ?? 2);
       } catch (error) {
@@ -176,6 +195,8 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         setTeamColors(DEMO_DATA.teamColors || {});
         setRepulsors(DEMO_DATA.repulsors || []);
         setAlgorithm(DEMO_DATA.algorithm || "scores");
+        // Keep currentCollection as "Players" if demo data doesn't have it
+        setCurrentCollection(DEMO_DATA.currentCollection || "Players?");
         setShowScores(DEMO_DATA.showScores);
         setNumTeams(DEMO_DATA.numTeams);
       } finally {
@@ -219,8 +240,10 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
       teamColors,
       repulsors,
       algorithm,
+      currentCollection, // Include currentCollection in saved data
     };
 
+    console.log("Saving data to storage:", { currentCollection }); // Add this debug log
     saveToStorage(dataToSave);
   }, [
     names,
@@ -231,6 +254,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     repulsors,
     isLoading,
     algorithm,
+    currentCollection, // Add currentCollection to dependency array
   ]);
 
   const addName = (name: string, score: number) => {
@@ -545,6 +569,11 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
           throw new Error("Incorrect password");
         }
       }
+
+      // Only update currentCollection after successful password verification
+      // and when we're actually loading data (not just checking password)
+      console.log("Loading collection:", collection);
+      setCurrentCollection(collection);
 
       // Password is correct or not needed, reconstruct data
       // Use numTeams from Firestore data if available, otherwise use current state's numTeams as a fallback

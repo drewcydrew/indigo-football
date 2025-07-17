@@ -17,6 +17,7 @@ import Feather from "react-native-vector-icons/Feather";
 import { useNames } from "../../context/NamesContext"; // Adjust path as needed
 // Assuming styles are in a shared file or you'll move them
 import { styles } from "./CloudSyncStyles"; // Create or adjust this path
+import { KeyboardAvoidingView } from "react-native"; // Import for keyboard handling on mobile
 
 interface SaveCloudSyncProps {
   onClose: () => void;
@@ -73,7 +74,18 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
     setLoadingCollections(true);
     try {
       const availableCollections = await listCollections();
-      setCollections(availableCollections);
+      // Filter out demo teams that shouldn't be overwritten
+      const demoTeams = [
+        "testing",
+        "tottenham hotspurs",
+        "ac milan",
+        "celtic fc",
+        "real madrid",
+      ]; // Add your demo team names here
+      const filteredCollections = availableCollections.filter(
+        (collection) => !demoTeams.includes(collection.name.toLowerCase())
+      );
+      setCollections(filteredCollections);
     } catch (error) {
       if (Platform.OS === "web") {
         showWebStatusDialog("Failed to fetch collections", false);
@@ -294,7 +306,11 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
           setSaveOptionsModalVisible(true); // Go back to options instead of closing all
         }}
       >
-        <View style={styles.modalContainer}>
+        <KeyboardAvoidingView
+          style={styles.modalContainer}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        >
           <View
             style={[
               styles.modalView,
@@ -353,7 +369,7 @@ const SaveCloudSync: React.FC<SaveCloudSyncProps> = ({
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Collections Modal (for "Update Existing") */}

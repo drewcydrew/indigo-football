@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
-import { Player } from '../context/NamesContext';
+import { StorageData } from '../context/NamesContext';
 
 const STORAGE_KEY = '@indigo_football_stored_data';
 
@@ -34,33 +34,30 @@ const webStorage = {
 
 const storage = isWeb ? webStorage : AsyncStorage;
 
-export const saveToStorage = async (data: { 
-  names: Player[][], 
-  showScores: boolean, 
-  numTeams: number 
-}): Promise<void> => {
+export const saveToStorage = async (data: StorageData): Promise<void> => {
   try {
     const serializedData = JSON.stringify({
       ...data,
       timestamp: Date.now(),
       platform: Platform.OS
     });
+    console.log('Saving to storage:', data); // Debug log
     await storage.setItem(STORAGE_KEY, serializedData);
   } catch (error) {
     console.warn('Failed to save data:', error);
   }
 };
 
-export const loadFromStorage = async (): Promise<{
-  names: Player[][] | null,
-  showScores: boolean,
-  numTeams: number
-}> => {
+export const loadFromStorage = async (): Promise<StorageData | null> => {
   try {
     const data = await storage.getItem(STORAGE_KEY);
-    if (!data) return { names: null, showScores: true, numTeams: 2 };
+    if (!data) {
+      console.log('No data found in storage');
+      return null;
+    }
 
     const parsed = JSON.parse(data);
+    console.log('Loaded from storage:', parsed); // Debug log
     
     // Validate the data structure
     const isValid = parsed.names && Array.isArray(parsed.names) && 
@@ -73,14 +70,24 @@ export const loadFromStorage = async (): Promise<{
         )
       );
 
+    if (!isValid) {
+      console.warn('Invalid data structure in storage');
+      return null;
+    }
+
     return {
-      names: isValid ? parsed.names : null,
+      names: parsed.names,
       showScores: typeof parsed.showScores === 'boolean' ? parsed.showScores : true,
-      numTeams: typeof parsed.numTeams === 'number' ? parsed.numTeams : 2
+      numTeams: typeof parsed.numTeams === 'number' ? parsed.numTeams : 2,
+      teamNames: parsed.teamNames || {},
+      teamColors: parsed.teamColors || {},
+      repulsors: parsed.repulsors || [],
+      algorithm: parsed.algorithm || 'scores',
+      currentCollection: parsed.currentCollection || 'Players'
     };
   } catch (error) {
     console.warn('Failed to load data:', error);
-    return { names: null, showScores: true, numTeams: 2 };
+    return null;
   }
 };
 

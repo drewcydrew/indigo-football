@@ -7,7 +7,7 @@ import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 
-import { NamesProvider } from "@/context/NamesContext";
+import { NamesProvider, useNames } from "@/context/NamesContext";
 
 import RepulsorManagerButton from "@/components/displays/RepulsorManagerButton";
 import AddName from "@/components/buttonmodals/AddName";
@@ -26,11 +26,13 @@ function TabBarIcon(props: {
   return <Ionicons size={28} style={{ marginBottom: -3 }} {...props} />;
 }
 
-export default function TabLayout() {
+// Create a separate component for the tabs that can use the context
+function TabsContent() {
   const colorScheme = useColorScheme();
+  const { currentCollection } = useNames();
 
   return (
-    <NamesProvider>
+    <>
       <AppBanner
         appName="Indigo Football"
         appIcon={require("../../assets/images/icon.png")}
@@ -55,7 +57,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="PlayersScreen"
           options={{
-            title: "Players",
+            title: "Players", // This sets the tab title
+            headerTitle: currentCollection || "Players", // This sets the header title
             headerTitleAlign: "center",
             headerLeft: () => <CloudSync />,
             headerRight: () => <AddName />,
@@ -87,6 +90,14 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
+    </>
+  );
+}
+
+export default function TabLayout() {
+  return (
+    <NamesProvider>
+      <TabsContent />
     </NamesProvider>
   );
 }

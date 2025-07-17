@@ -42,32 +42,10 @@ const CloudSync = () => {
     // setOptionsModalVisible(true); // If you want to go back to options
   };
 
-  // Render Load Flow
-  if (activeFlow === "load") {
-    return (
-      <LoadCloudSync
-        onClose={handleFlowClose}
-        useNamesContext={useNamesContextHook}
-        colorScheme={colorScheme}
-      />
-    );
-  }
-
-  // Render Save Flow
-  if (activeFlow === "save") {
-    return (
-      <SaveCloudSync
-        onClose={handleFlowClose}
-        useNamesContext={useNamesContextHook}
-        colorScheme={colorScheme}
-      />
-    );
-  }
-
-  // Render Main Options Button and Modal
+  // Always render the cloud icon button
   return (
     <View>
-      {/* Cloud Icon Button */}
+      {/* Cloud Icon Button - Always visible */}
       <TouchableOpacity
         style={styles.cloudIconButton}
         onPress={() => setOptionsModalVisible(true)}
@@ -132,11 +110,26 @@ const CloudSync = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Render Load Flow as Modal */}
+      {activeFlow === "load" && (
+        <LoadCloudSync
+          onClose={handleFlowClose}
+          useNamesContext={useNamesContextHook}
+          colorScheme={colorScheme}
+        />
+      )}
+
+      {/* Render Save Flow as Modal */}
+      {activeFlow === "save" && (
+        <SaveCloudSync
+          onClose={handleFlowClose}
+          useNamesContext={useNamesContextHook}
+          colorScheme={colorScheme}
+        />
+      )}
     </View>
   );
 };
-
-// The StyleSheet.create({...}) block that was previously here should now be in CloudSyncStyles.ts
-// Ensure CloudSyncStyles.ts is correctly imported.
 
 export default CloudSync;

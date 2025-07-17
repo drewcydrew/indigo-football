@@ -32,7 +32,7 @@ export default function TabLayout() {
   return (
     <NamesProvider>
       <AppBanner
-        appName="Double Bill"
+        appName="Indigo Football"
         appIcon={require("../../assets/images/icon.png")}
         privacyPolicyUrl="https://indigo-football-privacy-policy.onrender.com/"
         androidUrl="https://play.google.com/apps/internaltest/4701673097324534263"

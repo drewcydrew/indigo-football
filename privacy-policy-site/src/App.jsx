@@ -7,7 +7,7 @@ function App() {
   return (
     <>
       <div className="privacy-policy">
-        <h1>Privacy Policy</h1>
+        <h1>Indigo Football Privacy Policy</h1>
         <p><strong>Last Updated:</strong> {new Date().toLocaleDateString()}</p>
         
         <section>

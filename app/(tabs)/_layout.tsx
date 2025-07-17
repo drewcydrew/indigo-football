@@ -16,6 +16,7 @@ import SelectAllButton from "@/components/buttonmodals/SelectAllButton";
 
 import RandomizeTeamsRandomizeIcon from "@/components/buttonmodals/RandomiseTeamsRandomiseIcon";
 import RandomizeTeamsSettingsIcon from "@/components/buttonmodals/RandomizeTeamsSettingsIcon";
+import AppBanner from "@/components/AppBanner";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -30,6 +31,14 @@ export default function TabLayout() {
 
   return (
     <NamesProvider>
+      <AppBanner
+        appName="Double Bill"
+        appIcon={require("../../assets/images/icon.png")}
+        privacyPolicyUrl="https://indigo-football-privacy-policy.onrender.com/"
+        androidUrl="https://play.google.com/apps/internaltest/4701673097324534263"
+        androidTestersGroupUrl="https://groups.google.com/g/indigo-football-testers"
+        iosUrl="https://apps.apple.com/us/app/indigo-football/id6740720730"
+      />
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <Tabs>
         <Tabs.Screen

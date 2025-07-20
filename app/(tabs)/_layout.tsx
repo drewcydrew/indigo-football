@@ -40,6 +40,10 @@ function TabsContent() {
         androidUrl="https://play.google.com/apps/internaltest/4701673097324534263"
         androidTestersGroupUrl="https://groups.google.com/g/indigo-football-testers"
         iosUrl="https://apps.apple.com/us/app/indigo-football/id6740720730"
+        backgroundColor="#000000ff"
+        borderColor="#ffffffff"
+        accentColor="#4e6ae7ff"
+        textColor="#ffffff"
       />
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <Tabs>

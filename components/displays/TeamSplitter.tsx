@@ -16,7 +16,8 @@ import { useTeamGeneration } from "../../context/useGenerateTeams";
 import InfoDisplay from "../InfoDisplay";
 
 const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
-  const { teams, updateTeamName, updateTeamColor, names } = useNames();
+  const { teams, updateTeamName, updateTeamColor, names, algorithm } =
+    useNames();
   const textColor = useThemeColor({}, "text");
   const backgroundColor = useThemeColor({}, "background");
   const [colorPickerVisible, setColorPickerVisible] = useState(false);
@@ -33,6 +34,23 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
     (team) =>
       team.players.length > 0 && team.players.every((player) => player.included)
   );
+
+  // Add logging to see what's happening with teams
+  console.log("TeamSplitter render - algorithm:", algorithm);
+  console.log("TeamSplitter render - teams count:", teams.length);
+  console.log("TeamSplitter render - activeTeams count:", activeTeams.length);
+  teams.forEach((team, index) => {
+    console.log(
+      `Team ${index} (${team.name}):`,
+      team.players.length,
+      "players"
+    );
+    team.players.forEach((player, pIndex) => {
+      console.log(
+        `  Player ${pIndex}: ${player.name}(${player.score}) included=${player.included}`
+      );
+    });
+  });
 
   // Only auto-generate teams when the component first mounts
   useEffect(() => {
@@ -62,6 +80,11 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
       0
     );
 
+    const averageScore =
+      team.players.length > 0
+        ? (totalScore / team.players.length).toFixed(1)
+        : 0;
+
     const teamColor = team.color || "#FFFFFF";
 
     return (
@@ -86,9 +109,14 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
         </View>
 
         {showScores && (
-          <Text style={[styles.totalScoreText, { color: textColor }]}>
-            Total Score: {totalScore}
-          </Text>
+          <>
+            <Text style={[styles.totalScoreText, { color: textColor }]}>
+              Total Score: {totalScore}
+            </Text>
+            <Text style={[styles.averageScoreText, { color: textColor }]}>
+              Average Score: {averageScore}
+            </Text>
+          </>
         )}
 
         {team.players.map((player: Player, playerIndex: number) => (
@@ -236,6 +264,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 5,
+  },
+  averageScoreText: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 8,
+    fontStyle: "italic",
   },
   playerRow: {
     flexDirection: "row",

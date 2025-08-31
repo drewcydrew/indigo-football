@@ -57,7 +57,14 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
 
   // Also regenerate teams when algorithm changes
   const handleAlgorithmChange = () => {
-    const newAlgorithm = algorithm === "scores" ? "players" : "scores";
+    let newAlgorithm: string;
+    if (algorithm === "scores") {
+      newAlgorithm = "average";
+    } else if (algorithm === "average") {
+      newAlgorithm = "players";
+    } else {
+      newAlgorithm = "scores";
+    }
     setAlgorithm(newAlgorithm);
 
     // Pass the current team number explicitly
@@ -151,7 +158,11 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
                 style={styles.algorithmToggle}
               >
                 <Text style={styles.algorithmText}>
-                  {algorithm === "scores" ? "score" : "player"}
+                  {algorithm === "scores"
+                    ? "score"
+                    : algorithm === "average"
+                    ? "average"
+                    : "player"}
                 </Text>
               </TouchableOpacity>
             </View>

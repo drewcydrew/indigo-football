@@ -329,18 +329,67 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const saveTeams = (newTeams: Player[][]) => {
+    console.log("=== saveTeams START ===");
+    console.log("saveTeams called with:", newTeams.length, "teams");
+
+    // Log each input team in detail
+    newTeams.forEach((team, index) => {
+      console.log(`Input Team ${index}:`, team.length, "players");
+      team.forEach((player, pIndex) => {
+        console.log(`  ${pIndex}: ${player.name}(${player.score})`);
+      });
+    });
+
     // Get all currently excluded players
     const excludedPlayers = names.flat().filter((player) => !player.included);
+    console.log(
+      "Excluded players:",
+      excludedPlayers.length,
+      excludedPlayers.map((p) => p.name)
+    );
 
-    // Create a copy of the new teams
-    const updatedTeams = [...newTeams];
+    // Create a proper deep copy of the new teams
+    const updatedTeams: Player[][] = [];
+
+    // Copy each team individually to avoid reference issues
+    for (let i = 0; i < newTeams.length; i++) {
+      updatedTeams[i] = [];
+      for (let j = 0; j < newTeams[i].length; j++) {
+        updatedTeams[i][j] = { ...newTeams[i][j] }; // Deep copy each player object
+      }
+    }
+
+    console.log(
+      "After deep copy - updatedTeams:",
+      updatedTeams.length,
+      "teams"
+    );
+    updatedTeams.forEach((team, index) => {
+      console.log(`Copied Team ${index}:`, team.length, "players");
+      team.forEach((player, pIndex) => {
+        console.log(`  ${pIndex}: ${player.name}(${player.score})`);
+      });
+    });
 
     // If there are excluded players, add them to a "bench" team
     if (excludedPlayers.length > 0) {
-      // Create an "excluded" team at the end of the array
-      updatedTeams.push(excludedPlayers);
+      const excludedTeam: Player[] = [];
+      for (let i = 0; i < excludedPlayers.length; i++) {
+        excludedTeam[i] = { ...excludedPlayers[i] }; // Deep copy excluded players too
+      }
+      updatedTeams.push(excludedTeam);
+      console.log("Added excluded players as separate team");
     }
 
+    console.log("Final teams before setNames:", updatedTeams.length, "teams");
+    updatedTeams.forEach((team, index) => {
+      console.log(`Final Team ${index}:`, team.length, "players");
+      team.forEach((player, pIndex) => {
+        console.log(`  ${pIndex}: ${player.name}(${player.score})`);
+      });
+    });
+
+    console.log("Calling setNames with updatedTeams");
     setNames(updatedTeams);
 
     // When new teams are created, preserve existing names and colors where possible
@@ -361,12 +410,22 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
     // Update teams with preserved names and colors
     const updatedTeamsArray = updatedTeams.map((players, index) => ({
       id: index,
-      players: players,
+      players: [...players], // Another deep copy for the teams array
       name: teamNames[index] || `Team ${index + 1}`,
       color: teamColors[index] || defaultColors[index % defaultColors.length],
     }));
 
+    console.log("Setting teams array:", updatedTeamsArray.length, "teams");
+    updatedTeamsArray.forEach((team, index) => {
+      console.log(
+        `Teams Array Team ${index} (${team.name}):`,
+        team.players.length,
+        "players"
+      );
+    });
+
     setTeams(updatedTeamsArray);
+    console.log("=== saveTeams END ===");
   };
 
   const updatePlayer = (

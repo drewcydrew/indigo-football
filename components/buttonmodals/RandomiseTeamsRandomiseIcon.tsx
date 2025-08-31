@@ -67,10 +67,6 @@ export function getRandomTeams(
   }
 
   // If we couldn't find a valid distribution, try our best with swapping
-  console.warn(
-    "Could not find a perfect team distribution after maximum attempts. Using best effort approach."
-  );
-
   // Fallback to normal distribution
   const shuffledPlayers = shuffle(allPlayers);
   const minPlayersPerTeam = Math.floor(allPlayers.length / numTeams);
@@ -158,10 +154,6 @@ export function getRandomTeamsByScores(
     }
   }
 
-  console.warn(
-    "Could not find a perfect team distribution after maximum attempts. Using best effort approach."
-  );
-
   // Fallback to a standard distribution
   const scoreGroups: { [key: number]: Player[] } = {};
   players.forEach((player) => {
@@ -199,16 +191,7 @@ export function getRandomTeamsByAverage(
   numTeams: number,
   repulsors: Repulsor[] = []
 ): Player[][] {
-  console.log("=== getRandomTeamsByAverage START (enhanced balancing) ===");
-  console.log(
-    "Input players:",
-    players.length,
-    players.map((p) => `${p.name}(${p.score})`)
-  );
-  console.log("Input numTeams:", numTeams);
-
   if (players.length === 0 || numTeams <= 0) {
-    console.log("Early return: no players or invalid numTeams");
     return [];
   }
 
@@ -317,50 +300,24 @@ export function getRandomTeamsByAverage(
     const minAvg = Math.min(...averages);
     const range = maxAvg - minAvg;
 
-    if (attempt % 50 === 0 || balanceScore < bestScore) {
-      console.log(
-        `Attempt ${attempt + 1}: balance score = ${balanceScore.toFixed(
-          3
-        )}, range = ${range.toFixed(2)}`
-      );
-      teams.forEach((team, index) => {
-        const avg = getTeamAverage(team);
-        console.log(
-          `  Team ${index}: ${team.length} players, avg = ${avg.toFixed(2)}`
-        );
-      });
-    }
-
     // Keep track of the best distribution so far
     if (balanceScore < bestScore) {
       bestScore = balanceScore;
       bestTeams = teams.map((team) => [...team]); // Deep copy
-      console.log(
-        `  NEW BEST! Balance score: ${balanceScore.toFixed(
-          3
-        )}, Range: ${range.toFixed(2)}`
-      );
 
       // If we achieve excellent balance, we can stop early
       // Very strict criteria: range < 0.2 and balance score < 3
       if (range < 0.2 && balanceScore < 3) {
-        console.log(`  Excellent balance achieved, stopping early`);
         break;
       }
 
       // Good balance criteria: range < 0.3 and balance score < 5
       if (range < 0.3 && balanceScore < 5 && attempt > 200) {
-        console.log(
-          `  Very good balance achieved after ${attempt} attempts, stopping`
-        );
         break;
       }
 
       // Decent balance criteria: range < 0.5 and balance score < 10
       if (range < 0.5 && balanceScore < 10 && attempt > 500) {
-        console.log(
-          `  Good balance achieved after ${attempt} attempts, stopping`
-        );
         break;
       }
     }
@@ -368,7 +325,6 @@ export function getRandomTeamsByAverage(
 
   // If we didn't find any valid distribution due to repulsors, fall back to a simple distribution
   if (bestTeams.length === 0) {
-    console.log("No valid distribution found due to repulsors, using fallback");
     const shuffledPlayers = shuffle(players);
     const teams: Player[][] = Array(numTeams)
       .fill(null)
@@ -393,34 +349,6 @@ export function getRandomTeamsByAverage(
     bestTeams = teams;
   }
 
-  console.log("\n=== FINAL RESULT ===");
-  console.log(`Best balance score achieved: ${bestScore.toFixed(3)}`);
-
-  const finalAverages = bestTeams
-    .map((team) => getTeamAverage(team))
-    .filter((avg) => avg > 0);
-  const finalMaxAvg = Math.max(...finalAverages);
-  const finalMinAvg = Math.min(...finalAverages);
-  const finalRange = finalMaxAvg - finalMinAvg;
-
-  console.log(
-    `Average range: ${finalRange.toFixed(2)} (${finalMinAvg.toFixed(
-      2
-    )} - ${finalMaxAvg.toFixed(2)})`
-  );
-
-  bestTeams.forEach((team, index) => {
-    const total = team.reduce((sum, player) => sum + player.score, 0);
-    const avg = team.length > 0 ? (total / team.length).toFixed(2) : "0.00";
-    console.log(
-      `Team ${index}: ${team.length} players, total=${total}, avg=${avg}`
-    );
-    console.log(
-      `  Players: ${team.map((p) => `${p.name}(${p.score})`).join(", ")}`
-    );
-  });
-  console.log("=== getRandomTeamsByAverage END ===\n");
-
   return bestTeams;
 }
 
@@ -431,7 +359,6 @@ const RandomizeTeamsRandomizeIcon: React.FC = () => {
   const handleRandomize = () => {
     const allPlayers = [...names.flat()].filter((player) => player.included);
     if (allPlayers.length === 0) {
-      console.warn("No players available to create teams");
       return;
     }
 

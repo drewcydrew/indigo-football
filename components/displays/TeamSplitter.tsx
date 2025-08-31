@@ -35,27 +35,9 @@ const TeamSplitter = ({ showScores }: { showScores: boolean }) => {
       team.players.length > 0 && team.players.every((player) => player.included)
   );
 
-  // Add logging to see what's happening with teams
-  console.log("TeamSplitter render - algorithm:", algorithm);
-  console.log("TeamSplitter render - teams count:", teams.length);
-  console.log("TeamSplitter render - activeTeams count:", activeTeams.length);
-  teams.forEach((team, index) => {
-    console.log(
-      `Team ${index} (${team.name}):`,
-      team.players.length,
-      "players"
-    );
-    team.players.forEach((player, pIndex) => {
-      console.log(
-        `  Player ${pIndex}: ${player.name}(${player.score}) included=${player.included}`
-      );
-    });
-  });
-
   // Only auto-generate teams when the component first mounts
   useEffect(() => {
     if (initialRender) {
-      console.log("Initial team generation...");
       generateTeams();
       setInitialRender(false);
     }

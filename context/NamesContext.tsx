@@ -146,10 +146,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
             savedData.names.some((team) => team.length > 0)
         );
 
-        console.log("Has existing data:", hasData);
         const dataToUse = hasData ? savedData : DEMO_DATA;
-
-        console.log("Using demo data:", !hasData);
 
         if (dataToUse.names) {
           setNames(dataToUse.names);
@@ -173,19 +170,10 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
 
         // Load currentCollection from storage - fix the logic here
         if (hasData && savedData.currentCollection) {
-          console.log(
-            "Using saved currentCollection:",
-            savedData.currentCollection
-          );
           setCurrentCollection(savedData.currentCollection);
         } else if (!hasData && DEMO_DATA.currentCollection) {
-          console.log(
-            "Using demo currentCollection:",
-            DEMO_DATA.currentCollection
-          );
           setCurrentCollection(DEMO_DATA.currentCollection);
         } else {
-          console.log("Using default currentCollection: Players");
           setCurrentCollection("Players");
         }
 
@@ -329,24 +317,8 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const saveTeams = (newTeams: Player[][]) => {
-    console.log("=== saveTeams START ===");
-    console.log("saveTeams called with:", newTeams.length, "teams");
-
-    // Log each input team in detail
-    newTeams.forEach((team, index) => {
-      console.log(`Input Team ${index}:`, team.length, "players");
-      team.forEach((player, pIndex) => {
-        console.log(`  ${pIndex}: ${player.name}(${player.score})`);
-      });
-    });
-
     // Get all currently excluded players
     const excludedPlayers = names.flat().filter((player) => !player.included);
-    console.log(
-      "Excluded players:",
-      excludedPlayers.length,
-      excludedPlayers.map((p) => p.name)
-    );
 
     // Create a proper deep copy of the new teams
     const updatedTeams: Player[][] = [];
@@ -359,18 +331,6 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    console.log(
-      "After deep copy - updatedTeams:",
-      updatedTeams.length,
-      "teams"
-    );
-    updatedTeams.forEach((team, index) => {
-      console.log(`Copied Team ${index}:`, team.length, "players");
-      team.forEach((player, pIndex) => {
-        console.log(`  ${pIndex}: ${player.name}(${player.score})`);
-      });
-    });
-
     // If there are excluded players, add them to a "bench" team
     if (excludedPlayers.length > 0) {
       const excludedTeam: Player[] = [];
@@ -378,18 +338,8 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         excludedTeam[i] = { ...excludedPlayers[i] }; // Deep copy excluded players too
       }
       updatedTeams.push(excludedTeam);
-      console.log("Added excluded players as separate team");
     }
 
-    console.log("Final teams before setNames:", updatedTeams.length, "teams");
-    updatedTeams.forEach((team, index) => {
-      console.log(`Final Team ${index}:`, team.length, "players");
-      team.forEach((player, pIndex) => {
-        console.log(`  ${pIndex}: ${player.name}(${player.score})`);
-      });
-    });
-
-    console.log("Calling setNames with updatedTeams");
     setNames(updatedTeams);
 
     // When new teams are created, preserve existing names and colors where possible
@@ -415,17 +365,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
       color: teamColors[index] || defaultColors[index % defaultColors.length],
     }));
 
-    console.log("Setting teams array:", updatedTeamsArray.length, "teams");
-    updatedTeamsArray.forEach((team, index) => {
-      console.log(
-        `Teams Array Team ${index} (${team.name}):`,
-        team.players.length,
-        "players"
-      );
-    });
-
     setTeams(updatedTeamsArray);
-    console.log("=== saveTeams END ===");
   };
 
   const updatePlayer = (
@@ -635,7 +575,6 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
 
       // Only update currentCollection after successful password verification
       // and when we're actually loading data (not just checking password)
-      console.log("Loading collection:", collection);
       setCurrentCollection(collection);
 
       // Password is correct or not needed, reconstruct data
@@ -669,9 +608,6 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
           } else {
             // Handle players with out-of-bounds teamIndex, e.g., add to a default team or log warning
             // For now, let's add to the first team if teamIndex is invalid
-            console.warn(
-              `Player ${player.name} has invalid teamIndex ${player.teamIndex}. Adding to team 0.`
-            );
             if (reconstructedNames[0]) {
               reconstructedNames[0].push(cleanPlayer);
             } else if (numberOfTeamsToReconstruct > 0) {

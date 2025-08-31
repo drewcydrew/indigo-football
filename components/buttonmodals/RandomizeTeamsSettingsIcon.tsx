@@ -45,10 +45,6 @@ const RandomizeTeamsSettingsIcon: React.FC = () => {
 
     // Auto-regenerate teams when number of teams changes
     if (value !== lastGeneratedTeamNum) {
-      console.log(
-        `Teams changed from ${lastGeneratedTeamNum} to ${value}, regenerating...`
-      );
-
       // Call generateTeams with the new value directly
       generateTeams(value); // We need to modify the hook to accept this parameter
       setLastGeneratedTeamNum(value);

@@ -26,7 +26,8 @@
         "backgroundColor": "#ffffff"
       },
       "versionCode": 4,
-      "package": "com.drew92.indigofootball"
+      "package": "com.drew92.indigofootball",
+      "targetSdkVersion": 35
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +36,17 @@
     },
     "plugins": [
       "expo-router",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

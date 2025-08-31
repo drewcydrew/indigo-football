@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNames, Player, Repulsor } from "../../context/NamesContext";
 
@@ -448,15 +448,34 @@ const RandomizeTeamsRandomizeIcon: React.FC = () => {
   };
 
   return (
-    <TouchableOpacity style={styles.iconButton} onPress={handleRandomize}>
-      <Icon name="shuffle" size={40} color="#007bff" />
-    </TouchableOpacity>
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.iconButton} onPress={handleRandomize}>
+        <Icon name="shuffle" size={40} color="#007bff" />
+      </TouchableOpacity>
+      <Text style={styles.algorithmText}>
+        {algorithm === "scores"
+          ? "score"
+          : algorithm === "average"
+          ? "average"
+          : "player"}
+      </Text>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  iconButton: {
+  container: {
+    alignItems: "center",
     marginHorizontal: 10,
+  },
+  iconButton: {
+    // marginHorizontal removed since it's now on container
+  },
+  algorithmText: {
+    fontSize: 10,
+    color: "#007bff",
+    marginTop: 2,
+    fontWeight: "500",
   },
 });
 

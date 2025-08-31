@@ -38,14 +38,14 @@ export function useTeamGeneration() {
     }
 
     let teams = [];
-    if (algorithm === "scores") {
-      console.log("Using scores algorithm");
+    if (algorithm === "total") {
+      console.log("Using total algorithm");
       teams = getRandomTeamsByScores(allPlayers, numTeams, repulsors);
     } else if (algorithm === "average") {
       console.log("Using average algorithm");
       teams = getRandomTeamsByAverage(allPlayers, numTeams, repulsors);
     } else {
-      console.log("Using players algorithm");
+      console.log("Using random algorithm");
       teams = getRandomTeams(allPlayers, numTeams, repulsors);
     }
 

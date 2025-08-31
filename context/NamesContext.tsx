@@ -115,7 +115,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
   const [teamColors, setTeamColors] = useState<Record<number, string>>({});
   const [teamNames, setTeamNames] = useState<Record<number, string>>({}); // New state for team names
   const [repulsors, setRepulsors] = useState<Repulsor[]>([]);
-  const [algorithm, setAlgorithm] = useState("scores");
+  const [algorithm, setAlgorithm] = useState("total");
 
   const [currentCollection, setCurrentCollection] = useState<string>("Players");
 
@@ -198,7 +198,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         setTeamNames(DEMO_DATA.teamNames || {});
         setTeamColors(DEMO_DATA.teamColors || {});
         setRepulsors(DEMO_DATA.repulsors || []);
-        setAlgorithm(DEMO_DATA.algorithm || "scores");
+        setAlgorithm(DEMO_DATA.algorithm || "total");
         // Keep currentCollection as "Players" if demo data doesn't have it
         setCurrentCollection(DEMO_DATA.currentCollection || "Players?");
         setShowScores(DEMO_DATA.showScores);
@@ -536,7 +536,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
         teamColors: teamColors || {}, // Ensure teamColors is an object
         showScores,
         numTeams,
-        algorithm: algorithm || "scores", // Ensure algorithm is a string
+        algorithm: algorithm || "total", // Ensure algorithm is a string
         repulsors: repulsors || [], // Ensure repulsors is an array
         lastUpdated: new Date().toISOString(),
       };
@@ -698,7 +698,7 @@ export const NamesProvider = ({ children }: { children: ReactNode }) => {
       if (data.algorithm) {
         setAlgorithm(data.algorithm);
       } else {
-        setAlgorithm("scores"); // Reset to default if not in Firestore data
+        setAlgorithm("total"); // Reset to default if not in Firestore data
       }
       if (data.repulsors) {
         setRepulsors(data.repulsors);

@@ -436,7 +436,7 @@ const RandomizeTeamsRandomizeIcon: React.FC = () => {
     }
 
     let teams: Player[][] = [];
-    if (algorithm === "scores") {
+    if (algorithm === "total") {
       teams = getRandomTeamsByScores(allPlayers, numTeams, repulsors);
     } else if (algorithm === "average") {
       teams = getRandomTeamsByAverage(allPlayers, numTeams, repulsors);
@@ -453,11 +453,11 @@ const RandomizeTeamsRandomizeIcon: React.FC = () => {
         <Icon name="shuffle" size={40} color="#007bff" />
       </TouchableOpacity>
       <Text style={styles.algorithmText}>
-        {algorithm === "scores"
-          ? "score"
+        {algorithm === "total"
+          ? "total"
           : algorithm === "average"
           ? "average"
-          : "player"}
+          : "random"}
       </Text>
     </View>
   );
